@@ -51,7 +51,7 @@ namespace Ledger.Reports
             set;
         }
 
-        public bool NonZeroBalancesOnly
+        public bool IncludeZeroBalances
         {
             get;
             set;
@@ -94,10 +94,8 @@ namespace Ledger.Reports
                 reportItems = reportItems.Where(reportItem => assetPredicate.Matches(reportItem.Asset)).ToList();
             }
 
-            if (NonZeroBalancesOnly)
-            {
+            if (!IncludeZeroBalances)
                 reportItems = reportItems.Where(reportItem => reportItem.BalanceDebit != 0 || reportItem.BalanceCredit != 0).ToList();
-            }
 
             reportItems = reportItems.OrderBy(reportItem => reportItem.Account, new AccountComparer()).ThenBy(reportItem => reportItem.Asset, new AssetComparer()).ToList();
 

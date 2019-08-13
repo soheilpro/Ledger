@@ -30,7 +30,7 @@ namespace Ledger.Commands
         {
             get
             {
-                return "[account] [--at index] [--all-levels] [--no-children] [--non-zero]";
+                return "[account] [--at index] [--all-levels] [--no-children] [--zero]";
             }
         }
 
@@ -49,7 +49,7 @@ namespace Ledger.Commands
         public override string[] GetSuggestions(string arg, int index, IContext context)
         {
             if (arg.StartsWith("--"))
-                return GetOptionSuggesions(arg, index, context, new string[] { "at", "asset", "all-levels", "no-children", "non-zero" });
+                return GetOptionSuggesions(arg, index, context, new string[] { "at", "asset", "all-levels", "no-children", "zero" });
 
             if (arg.StartsWith("@"))
                 return GetMarkSuggesions(arg, index, context);
@@ -72,7 +72,7 @@ namespace Ledger.Commands
             reportBuilder.AssetQuery = options.AssetQuery;
             reportBuilder.AllLevels = options.AllLevels;
             reportBuilder.NoChildren = options.NoChildren;
-            reportBuilder.NonZeroBalancesOnly = options.NonZeroBalancesOnly;
+            reportBuilder.IncludeZeroBalances = options.IncludeZeroBalances;
 
             var report = reportBuilder.GetReport();
 
@@ -117,8 +117,8 @@ namespace Ledger.Commands
             set;
         }
 
-        [Option("non-zero")]
-        public bool NonZeroBalancesOnly
+        [Option("zero")]
+        public bool IncludeZeroBalances
         {
             get;
             set;

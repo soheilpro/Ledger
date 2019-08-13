@@ -1,7 +1,6 @@
 using System;
 using System.Linq;
 using CommandLine;
-using Ledger.Core;
 using Ledger.Reports;
 
 namespace Ledger.Commands

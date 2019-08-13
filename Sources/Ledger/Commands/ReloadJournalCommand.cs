@@ -1,5 +1,4 @@
 using System;
-using Ledger.Journal;
 
 namespace Ledger.Commands
 {

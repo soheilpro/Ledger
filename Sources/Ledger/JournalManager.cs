@@ -1,7 +1,5 @@
 using System;
-using System.IO;
 using System.Linq;
-using Ledger.Core;
 using Ledger.Journal;
 
 namespace Ledger

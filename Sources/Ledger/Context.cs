@@ -1,6 +1,4 @@
 using System;
-using Ledger.Core;
-using Ledger.Journal;
 
 namespace Ledger
 {

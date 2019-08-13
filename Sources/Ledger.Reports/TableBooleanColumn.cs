@@ -1,5 +1,4 @@
 using System;
-using Ledger.Core;
 
 namespace Ledger.Reports
 {

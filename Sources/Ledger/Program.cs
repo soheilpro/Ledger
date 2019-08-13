@@ -1,8 +1,5 @@
 ﻿using System;
-using System.IO;
 using CommandLine;
-using Ledger.Core;
-using Ledger.Journal;
 
 namespace Ledger
 {

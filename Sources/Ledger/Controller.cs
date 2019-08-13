@@ -22,6 +22,7 @@ namespace Ledger
                 new PrintBalanceCheckCommand(this),
                 new PrintEntryItemsCommand(this),
                 new PrintProfitLossCommand(this),
+                new PrintOpeningEntryCommand(this),
                 new ReloadJournalCommand(this),
             };
         }

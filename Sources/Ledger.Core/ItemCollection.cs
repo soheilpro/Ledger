@@ -46,7 +46,7 @@ namespace Ledger.Core
                 else
                     childNode = new Node(_owner);
 
-                node.ChildNodes[idPart] = childNode;
+                node.ChildNodes.Set(idPart, childNode);
                 node = childNode;
             }
 
@@ -142,7 +142,7 @@ namespace Ledger.Core
 
                 if (queryPart == "*")
                 {
-                    foreach (var childNode in node.ChildNodes.Values)
+                    foreach (var childNode in node.ChildNodes.GetValues())
                         FindItemsByQueryParts(childNode, queryParts, queryPartIndex + 1, result);
 
                     return;
@@ -152,7 +152,7 @@ namespace Ledger.Core
                 {
                     var orQueryParts = queryPart.Split('|');
 
-                    foreach (var childNode in node.ChildNodes)
+                    foreach (var childNode in node.ChildNodes.GetPairs())
                     {
                         for (var orQueryPartIndex = 0; orQueryPartIndex < orQueryParts.Length; orQueryPartIndex++)
                         {
@@ -169,7 +169,7 @@ namespace Ledger.Core
                 {
                     var notQueryPart = queryPart.Substring(1);
 
-                    foreach (var childNode in node.ChildNodes)
+                    foreach (var childNode in node.ChildNodes.GetPairs())
                         if (childNode.Key != notQueryPart)
                             FindItemsByQueryParts(childNode.Value, queryParts, queryPartIndex + 1, result);
 
@@ -215,7 +215,7 @@ namespace Ledger.Core
                 get;
             }
 
-            public Dictionary<string, Node> ChildNodes
+            public NodeDictionary ChildNodes
             {
                 get;
             }
@@ -228,14 +228,14 @@ namespace Ledger.Core
             public Node(IIndexable owner)
             {
                 Owner = owner;
-                ChildNodes = new Dictionary<string, Node>();
+                ChildNodes = new NodeDictionary();
                 Items = new List<TItem>();
             }
 
             public Node(IIndexable owner, Node source)
             {
                 Owner = owner;
-                ChildNodes = new Dictionary<string, Node>(source.ChildNodes);
+                ChildNodes = new NodeDictionary(source.ChildNodes);
                 Items = new List<TItem>(source.Items);
             }
 
@@ -253,11 +253,11 @@ namespace Ledger.Core
                     if (node.Items.Count > 0)
                         result.AddRange(node.Items);
 
-                    if (node.ChildNodes.Count > 0)
+                    if (node.ChildNodes.GetCount() > 0)
                     {
-                        foreach (var childNode in node.ChildNodes.Values)
+                        foreach (var childNode in node.ChildNodes.GetValues())
                         {
-                            if (childNode.ChildNodes.Count == 0)
+                            if (childNode.ChildNodes.GetCount() == 0)
                             {
                                 if (childNode.Items.Count > 0)
                                     result.AddRange(childNode.Items);
@@ -282,6 +282,202 @@ namespace Ledger.Core
                 // Performance.MarkEnd("ItemCollection.Node.Copy");
 
                 return copy;
+            }
+        }
+
+        protected class NodeDictionary
+        {
+            private const int Capacity = 8;
+            private Bucket[] _buckets;
+            private int _size = 0;
+            private NodeDictionary _source;
+
+            public NodeDictionary()
+            {
+                _buckets = new Bucket[Capacity];
+            }
+
+            public NodeDictionary(NodeDictionary source)
+            {
+                _buckets = source._buckets;
+                _size = source._size;
+                _source = source;
+            }
+
+            public int GetCount()
+            {
+                return _size;
+            }
+
+            public void Set(string key, Node value)
+            {
+                if (_source != null)
+                {
+                    _buckets = new Bucket[Capacity];
+
+                    for (var i = 0; i < Capacity; i++)
+                    {
+                        var sourceBucket = _source._buckets[i];
+
+                        if (sourceBucket != null)
+                            _buckets[i] = new Bucket(sourceBucket);
+                    }
+
+                    _source = null;
+                }
+
+                var hashCode = key.GetHashCode() & 0x7FFFFFFF;
+                var index = hashCode % Capacity;
+
+                var bucket = _buckets[index];
+
+                if (bucket == null) {
+                    bucket = new Bucket();
+                    _buckets[index] = bucket;
+                }
+
+                if (bucket.Set(key, value))
+                    _size++;
+            }
+
+            public bool TryGetValue(string key, out Node value)
+            {
+                var hashCode = key.GetHashCode() & 0x7FFFFFFF;
+                var index = hashCode % Capacity;
+
+                var bucket = _buckets[index];
+
+                if (bucket == null)
+                {
+                    value = null;
+                    return false;
+                }
+
+                return bucket.TryGetValue(key, out value);
+            }
+
+            public IEnumerable<Node> GetValues()
+            {
+                for (var i = 0; i < Capacity; i++)
+                {
+                    var bucket = _buckets[i];
+
+                    if (bucket != null)
+                        foreach (var value in bucket.GetValues())
+                            yield return value;
+                }
+            }
+
+            public IEnumerable<KeyValuePair<string, Node>> GetPairs()
+            {
+                for (var i = 0; i < Capacity; i++)
+                {
+                    var bucket = _buckets[i];
+
+                    if (bucket != null)
+                        foreach (var pair in bucket.GetPairs())
+                            yield return pair;
+                }
+            }
+
+            private class Bucket
+            {
+                private int _capacity = 1;
+                private int _size = 0;
+                private string[] _keys;
+                private Node[] _values;
+                private Bucket _source;
+
+                public Bucket()
+                {
+                    _keys = new string[_capacity];
+                    _values = new Node[_capacity];
+                }
+
+                public Bucket(Bucket source)
+                {
+                    _capacity = source._capacity;
+                    _size = source._size;
+                    _keys = source._keys;
+                    _values = source._values;
+
+                    _source = source;
+                }
+
+                public int GetCount()
+                {
+                    return _size;
+                }
+
+                public bool Set(string key, Node value)
+                {
+                    if (_source != null)
+                    {
+                        _keys = new string[_capacity];
+                        _values = new Node[_capacity];
+
+                        Array.Copy(_source._keys, _keys, _size);
+                        Array.Copy(_source._values, _values, _size);
+
+                        _source = null;
+                    }
+
+                    for (var i = 0; i < _size; i++)
+                    {
+                        if (_keys[i] == key)
+                        {
+                            _values[i] = value;
+                            return false;
+                        }
+                    }
+
+                    if (_size == _capacity)
+                    {
+                        _capacity *= 2;
+
+                        var oldKeys = _keys;
+                        var oldValues = _values;
+
+                        _keys = new string[_capacity];
+                        _values = new Node[_capacity];
+
+                        Array.Copy(oldKeys, _keys, _size);
+                        Array.Copy(oldValues, _values, _size);
+                    }
+
+                    _keys[_size] = key;
+                    _values[_size] = value;
+                    _size++;
+
+                    return true;
+                }
+
+                public bool TryGetValue(string key, out Node value)
+                {
+                    for (var i = 0; i < _size; i++)
+                    {
+                        if (_keys[i] == key)
+                        {
+                            value = _values[i];
+                            return true;
+                        }
+                    }
+
+                    value = null;
+                    return false;
+                }
+
+                public IEnumerable<Node> GetValues()
+                {
+                    for (var i = 0; i < _size; i++)
+                        yield return _values[i];
+                }
+
+                public IEnumerable<KeyValuePair<string, Node>> GetPairs()
+                {
+                    for (var i = 0; i < _size; i++)
+                        yield return new KeyValuePair<string, Node>(_keys[i], _values[i]);
+                }
             }
         }
     }

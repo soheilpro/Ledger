@@ -34,25 +34,26 @@ namespace Ledger.Core
             _rootNode = CopyNode(_rootNode);
 
             var accountIdParts = ((Account)item.Account).IdParts;
-            var bucket = _rootNode;
+            var node = _rootNode;
 
-            foreach (var idPart in accountIdParts)
+            for (var accountIdPartIndex = 0; accountIdPartIndex < accountIdParts.Length; accountIdPartIndex++)
             {
+                var idPart = accountIdParts[accountIdPartIndex];
                 Node childNode;
 
-                if (bucket.ChildNodes.TryGetValue(idPart, out childNode))
+                if (node.ChildNodes.TryGetValue(idPart, out childNode))
                     childNode = CopyNode(childNode);
                 else
                     childNode = new Node(_owner);
 
-                bucket.ChildNodes[idPart] = childNode;
-                bucket = childNode;
+                node.ChildNodes[idPart] = childNode;
+                node = childNode;
             }
 
             if (existingItem != null)
-                bucket.Items.Remove(existingItem);
+                node.Items.Remove(existingItem);
 
-            bucket.Items.Add(item);
+            node.Items.Add(item);
 
             // Performance.MarkEnd("ItemCollection.AddOrUpdate");
         }
@@ -69,15 +70,17 @@ namespace Ledger.Core
         {
             // Performance.MarkStart("ItemCollection.FindItems(account)");
 
-            ICollection<TItem> result;
+            var result = new List<TItem>();
 
             if (account is Account)
             {
-                result = FindItemsByIdParts(_rootNode, ((Account)account).IdParts);
+                FindItemsByIdParts(_rootNode, ((Account)account).IdParts, result);
             }
             else
             {
-                result = _rootNode.GetAllItems().Where(item => account.Equals(item.Account)).ToList();
+                _rootNode.GetAllItems(result);
+
+                result = result.Where(item => account.Equals(item.Account)).ToList();
             }
 
             // Performance.MarkEnd("ItemCollection.FindItems(account)");
@@ -89,11 +92,11 @@ namespace Ledger.Core
         {
             // Performance.MarkStart("ItemCollection.FindItems(predicate)");
 
-            ICollection<TItem> result;
+            var result = new List<TItem>();
 
             if (predicate is QueryAccountPredicate)
             {
-                result = FindItemsByQueryParts(_rootNode, ((QueryAccountPredicate)predicate).QueryParts);
+                FindItemsByQueryParts(_rootNode, ((QueryAccountPredicate)predicate).QueryParts, 0, result);
             }
             else if (predicate is OrAccountPredicate)
             {
@@ -105,7 +108,9 @@ namespace Ledger.Core
             }
             else
             {
-                result = _rootNode.GetAllItems().Where(item => predicate.Matches(item.Account)).ToList();
+                _rootNode.GetAllItems(result);
+
+                result = result.Where(item => predicate.Matches(item.Account)).ToList();
             }
 
             // Performance.MarkEnd("ItemCollection.FindItems(predicate)");
@@ -113,73 +118,89 @@ namespace Ledger.Core
             return result;
         }
 
-        private ICollection<TItem> FindItemsByIdParts(Node node, ICollection<string> idParts)
+        private void FindItemsByIdParts(Node node, string[] idParts, List<TItem> result)
         {
-            foreach (var idPart in idParts)
-                if (!node.ChildNodes.TryGetValue(idPart, out node))
-                    return new List<TItem>();
+            for (var idPartIndex = 0; idPartIndex < idParts.Length; idPartIndex++)
+                if (!node.ChildNodes.TryGetValue(idParts[idPartIndex], out node))
+                    return;
 
-            return node.Items;
+            result.AddRange(node.Items);
         }
 
-        private ICollection<TItem> FindItemsByQueryParts(Node node, ICollection<string> queryParts)
+        private void FindItemsByQueryParts(Node node, string[] queryParts, int queryPartsStartIndex, List<TItem> result)
         {
-            var index = 0;
-
-            foreach (var queryPart in queryParts)
+            for (var queryPartIndex = queryPartsStartIndex; queryPartIndex < queryParts.Length; queryPartIndex++)
             {
-                if (queryPart.Equals("**", StringComparison.Ordinal))
-                    return node.GetAllItems();
+                var queryPart = queryParts[queryPartIndex];
 
-                if (queryPart.Equals("*", StringComparison.Ordinal))
+                if (queryPart == "**")
                 {
-                    var items = new List<TItem>();
+                    node.GetAllItems(result);
 
-                    foreach (var childNode in node.ChildNodes)
-                        items.AddRange(FindItemsByQueryParts(childNode.Value, queryParts.Skip(index + 1).ToArray()));
-
-                    return items;
+                    return;
                 }
 
-                if (queryPart.Contains('|'))
+                if (queryPart == "*")
                 {
-                    var items = new List<TItem>();
+                    foreach (var childNode in node.ChildNodes.Values)
+                        FindItemsByQueryParts(childNode, queryParts, queryPartIndex + 1, result);
+
+                    return;
+                }
+
+                if (Contains(queryPart, '|'))
+                {
                     var orQueryParts = queryPart.Split('|');
 
                     foreach (var childNode in node.ChildNodes)
-                        foreach (var orQueryPart in orQueryParts)
+                    {
+                        for (var orQueryPartIndex = 0; orQueryPartIndex < orQueryParts.Length; orQueryPartIndex++)
+                        {
+                            var orQueryPart = orQueryParts[orQueryPartIndex];
                             if (childNode.Key == orQueryPart)
-                                items.AddRange(FindItemsByQueryParts(childNode.Value, queryParts.Skip(index + 1).ToArray()));
+                                FindItemsByQueryParts(childNode.Value, queryParts, queryPartIndex + 1, result);
+                        }
+                    }
 
-                    return items;
+                    return;
                 }
 
-                if (queryPart.StartsWith("^", StringComparison.Ordinal))
+                if (queryPart[0] == '^')
                 {
-                    var items = new List<TItem>();
                     var notQueryPart = queryPart.Substring(1);
 
                     foreach (var childNode in node.ChildNodes)
                         if (childNode.Key != notQueryPart)
-                            items.AddRange(FindItemsByQueryParts(childNode.Value, queryParts.Skip(index + 1).ToArray()));
+                            FindItemsByQueryParts(childNode.Value, queryParts, queryPartIndex + 1, result);
 
-                    return items;
+                    return;
                 }
 
                 if (!node.ChildNodes.TryGetValue(queryPart, out node))
-                    return new List<TItem>();
-
-                index++;
+                {
+                    return;
+                }
             }
 
-            return node.Items;
+            result.AddRange(node.Items);
+        }
+
+        private static bool Contains(string str, char character)
+        {
+            for (var i = 0; i < str.Length; i++)
+                if (str[i] == character)
+                    return true;
+
+            return false;
         }
 
         public IEnumerator<TItem> GetEnumerator()
         {
-            var items = _rootNode.GetAllItems();
+            var result = new List<TItem>();
 
-            return items.GetEnumerator();
+            _rootNode.GetAllItems(result);
+
+            return result.GetEnumerator();
         }
 
         IEnumerator IEnumerable.GetEnumerator()
@@ -218,28 +239,38 @@ namespace Ledger.Core
                 Items = new List<TItem>(source.Items);
             }
 
-            public ICollection<TItem> GetAllItems()
+            public void GetAllItems(List<TItem> result)
             {
                 // Performance.MarkStart("ItemCollection.Node.GetAllItems");
 
-                var items = new List<TItem>();
+                var nodes = new Stack<Node>();
+                nodes.Push(this);
 
-                var buckets = new Stack<Node>();
-                buckets.Push(this);
-
-                while (buckets.Count > 0)
+                while (nodes.Count > 0)
                 {
-                    var node = buckets.Pop();
+                    var node = nodes.Pop();
 
-                    items.AddRange(node.Items);
+                    if (node.Items.Count > 0)
+                        result.AddRange(node.Items);
 
-                    foreach (var childNode in node.ChildNodes.Values)
-                        buckets.Push(childNode);
+                    if (node.ChildNodes.Count > 0)
+                    {
+                        foreach (var childNode in node.ChildNodes.Values)
+                        {
+                            if (childNode.ChildNodes.Count == 0)
+                            {
+                                if (childNode.Items.Count > 0)
+                                    result.AddRange(childNode.Items);
+
+                                continue;
+                            }
+
+                            nodes.Push(childNode);
+                        }
+                    }
                 }
 
                 // Performance.MarkEnd("ItemCollection.Node.GetAllItems");
-
-                return items;
             }
 
             public Node Copy(IIndexable newOwner)

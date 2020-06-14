@@ -15,6 +15,16 @@ namespace Ledger.Commands
             }
         }
 
+        public override string[] Aliases
+        {
+            get
+            {
+                return new[] {
+                    "e",
+                };
+            }
+        }
+
         public override string Arguments
         {
             get

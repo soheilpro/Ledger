@@ -45,9 +45,16 @@ namespace Ledger
                 var line = ReadLine.Read("> ").Trim();
 
                 if (line.Length == 0)
-                    continue;
+                {
+                    line = ReadLine.GetHistory().LastOrDefault();
 
-                ReadLine.AddHistory(line);
+                    if (line == null)
+                        continue;
+                }
+                else
+                {
+                    ReadLine.AddHistory(line);
+                }
 
                 string[] args;
 

@@ -99,6 +99,17 @@ Asset |  Assets  | Liabilities + Equity | Liabilities |  Equity   | Diff
 EUR   | 4,977.12 |            -4,977.12 |           0 | -4,977.12 |    0
 ```
 
+#### View Net Worth
+To view your net worth for a specific asset, run the `net-worth` command and pass the asset as a required argument:
+
+```
+> net-worth CURRENCY:USD
+
+    Asset     | Net Worth
+------------- | ---------
+CURRENCY:USD  |         0
+```
+
 ## Version History
 + **1.0**
 	+ Initial release.

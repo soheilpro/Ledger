@@ -22,6 +22,14 @@ namespace Ledger
             }
         }
 
+        public string JournalPath
+        {
+            get
+            {
+                return _journalPath;
+            }
+        }
+
         public string[] AccountIds
         {
             get

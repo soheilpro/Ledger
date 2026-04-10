@@ -1,4 +1,5 @@
 using System;
+using System.IO;
 using System.Linq;
 using CommandLine;
 using Ledger.Core;
@@ -20,7 +21,7 @@ namespace Ledger.Commands
         {
             get
             {
-                return "ASSET [--at index]";
+                return "asset [--at index]";
             }
         }
 
@@ -45,7 +46,14 @@ namespace Ledger.Commands
                 return GetMarkSuggesions(arg, index, context);
 
             if (index == 1)
-                return context.JournalManager.Journal.Entries.SelectMany(entry => entry.Items).Select(entryItem => entryItem.Asset.ToString()).Distinct().OrderBy(asset => asset).Where(asset => asset.StartsWith(arg, StringComparison.OrdinalIgnoreCase)).ToArray();
+                return context.JournalManager.Journal.Entries
+                    .SelectMany(entry => entry.Items)
+                    .Where(entryItem => new QueryAccountPredicate("Equity:Capital:**").Matches(entryItem.Account))
+                    .Select(entryItem => entryItem.Asset.ToString())
+                    .Distinct()
+                    .OrderBy(asset => asset)
+                    .Where(asset => asset.StartsWith(arg, StringComparison.OrdinalIgnoreCase))
+                    .ToArray();
 
             return base.GetSuggestions(arg, index, context);
         }
@@ -59,6 +67,7 @@ namespace Ledger.Commands
             reportBuilder.Book = "default";
             reportBuilder.Index = ResolveIndex(options.Index, context, false);
             reportBuilder.Asset = new Asset(options.AssetId);
+            reportBuilder.ExchangeRatesPath = Path.Combine(Path.GetDirectoryName(context.JournalManager.JournalPath), "exchange.txt");
 
             var report = reportBuilder.GetReport();
 
@@ -68,7 +77,7 @@ namespace Ledger.Commands
 
     internal class PrintNetWorthOptions
     {
-        [Value(0, Required = true, MetaName = "ASSET")]
+        [Value(0, Required = true, MetaName = "asset")]
         public string AssetId
         {
             get;

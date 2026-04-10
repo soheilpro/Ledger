@@ -53,15 +53,15 @@ namespace Ledger.Reports
             {
                 var assets = balance.Items.GetBalanceItemCombined(new QueryAccountPredicate("Assets:**"), sourceAsset).BalanceDebitOrDefault();
                 var liabilities = balance.Items.GetBalanceItemCombined(new QueryAccountPredicate("Liabilities:**"), sourceAsset).BalanceDebitOrDefault();
-                var amount = assets + liabilities;
+                var sourceAssetNetWorth = assets + liabilities;
 
                 if (sourceAsset.Equals(Asset))
                 {
-                    netWorth += amount;
+                    netWorth += sourceAssetNetWorth;
                     continue;
                 }
 
-                netWorth += amount * exchangeRates.GetRate(sourceAsset, Asset);
+                netWorth += sourceAssetNetWorth * exchangeRates.GetRate(sourceAsset, Asset);
             }
 
             return new NetWorthReport(new NetWorthReport.ReportItem

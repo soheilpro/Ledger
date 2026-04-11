@@ -68,7 +68,7 @@ namespace Ledger.Commands
             reportBuilder.Book = "default";
             reportBuilder.Index = ResolveIndex(options.Index, context, false);
             reportBuilder.Asset = new Asset(options.AssetId);
-            reportBuilder.RateProvider = FileRateProvider.Load(Path.Combine(Path.GetDirectoryName(context.JournalManager.JournalPath) ?? string.Empty, "exchange.txt"));
+            reportBuilder.RateProvider = FileRateProvider.Load(Path.Combine(Path.GetDirectoryName(context.JournalManager.JournalPath) ?? string.Empty, "rates.txt"));
 
             var report = reportBuilder.GetReport();
 

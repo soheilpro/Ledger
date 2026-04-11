@@ -42,7 +42,6 @@ namespace Ledger.Reports
             var book = new Book(Book);
             var balance = ledger.GetBalanceAtOrBefore(book, Index);
             var capitalBalanceItems = balance.Items.GetBalanceItemsCombined(new QueryAccountPredicate("Equity:Capital:**"));
-            var rateProvider = RateProvider ?? throw new ValidationException($"{nameof(RateProvider)} is not set.");
             var netWorth = 0m;
 
             foreach (var capitalBalanceItem in capitalBalanceItems)
@@ -56,7 +55,7 @@ namespace Ledger.Reports
                     continue;
                 }
 
-                netWorth += sourceAssetNetWorth * rateProvider.GetRate(sourceAsset, Asset);
+                netWorth += sourceAssetNetWorth * RateProvider.GetRate(sourceAsset, Asset);
             }
 
             return new NetWorthReport(new NetWorthReport.ReportItem

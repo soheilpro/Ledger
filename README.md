@@ -99,19 +99,6 @@ Asset |  Assets  | Liabilities + Equity | Liabilities |  Equity   | Diff
 EUR   | 4,977.12 |            -4,977.12 |           0 | -4,977.12 |    0
 ```
 
-#### View Net Worth
-To view your net worth in a specific target asset, run the `net-worth` command and pass the required `asset` argument:
-
-```
-> net-worth CURRENCY:USD
-
-    Asset     | Net Worth
-------------- | ---------
-CURRENCY:USD  |         0
-```
-
-`net-worth` discovers ledger assets using the `Equity:Capital:**` query and converts them into the target asset using rates from `exchange.txt`.
-
 ## Version History
 + **1.0**
 	+ Initial release.

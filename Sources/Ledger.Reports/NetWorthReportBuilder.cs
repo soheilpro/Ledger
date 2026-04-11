@@ -55,7 +55,7 @@ namespace Ledger.Reports
                     continue;
                 }
 
-                value += sourceAssetNetWorth * RateProvider.GetRate(sourceAsset, Asset);
+                value += sourceAssetNetWorth * RateProvider.GetRate(sourceAsset, Asset, Index);
             }
 
             return new NetWorthReport(new NetWorthReport.ReportItem

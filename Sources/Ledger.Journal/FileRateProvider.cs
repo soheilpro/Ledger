@@ -43,7 +43,7 @@ namespace Ledger.Journal
             return result;
         }
 
-        public decimal GetRate(IAsset source, IAsset destination)
+        public decimal GetRate(IAsset source, IAsset destination, string index)
         {
             if (source.Equals(destination))
                 return 1m;

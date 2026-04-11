@@ -45,15 +45,14 @@ namespace Ledger.Reports
             var ledger = GetLedger(Journal);
             var book = new Book(Book);
             var balance = ledger.GetBalanceAtOrBefore(book, Index);
-            var sourceAssets = balance.Items.GetBalanceItemsCombined(new QueryAccountPredicate("Equity:Capital:**")).Select(balanceItem => balanceItem.Asset).Distinct().ToArray();
+            var capitalBalanceItems = balance.Items.GetBalanceItemsCombined(new QueryAccountPredicate("Equity:Capital:**"));
             var exchangeRates = ExchangeRates.Load(ExchangeRatesPath);
             var netWorth = 0m;
 
-            foreach (var sourceAsset in sourceAssets)
+            foreach (var capitalBalanceItem in capitalBalanceItems)
             {
-                var assets = balance.Items.GetBalanceItemCombined(new QueryAccountPredicate("Assets:**"), sourceAsset).BalanceDebitOrDefault();
-                var liabilities = balance.Items.GetBalanceItemCombined(new QueryAccountPredicate("Liabilities:**"), sourceAsset).BalanceDebitOrDefault();
-                var sourceAssetNetWorth = assets + liabilities;
+                var sourceAsset = capitalBalanceItem.Asset;
+                var sourceAssetNetWorth = capitalBalanceItem.BalanceCreditOrDefault();
 
                 if (sourceAsset.Equals(Asset))
                 {

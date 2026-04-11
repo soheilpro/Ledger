@@ -51,14 +51,6 @@ namespace Ledger.Journal
             if (TryGetRate(source, destination, out var rate))
                 return rate;
 
-            if (TryGetRate(destination, source, out var reverseRate))
-            {
-                if (reverseRate == 0m)
-                    throw new ValidationException($"Exchange rate from '{destination}' to '{source}' is zero and cannot be reversed.");
-
-                return 1m / reverseRate;
-            }
-
             throw new ValidationException($"No exchange rate available from '{source}' to '{destination}'.");
         }
 
@@ -72,11 +64,7 @@ namespace Ledger.Journal
             while (queue.Any())
             {
                 var current = queue.Dequeue();
-
-                if (!_graph.TryGetValue(current.Asset, out var neighbors))
-                    continue;
-
-                foreach (var neighbor in neighbors)
+                foreach (var neighbor in GetNeighbors(current.Asset))
                 {
                     if (visited.Contains(neighbor.Key))
                         continue;
@@ -96,6 +84,29 @@ namespace Ledger.Journal
 
             rate = 0m;
             return false;
+        }
+
+        private IEnumerable<KeyValuePair<IAsset, decimal>> GetNeighbors(IAsset source)
+        {
+            if (_graph.TryGetValue(source, out var directNeighbors))
+            {
+                foreach (var directNeighbor in directNeighbors)
+                    yield return directNeighbor;
+            }
+
+            foreach (var rates in _graph)
+            {
+                if (!rates.Value.TryGetValue(source, out var reverseRate))
+                    continue;
+
+                if (reverseRate == 0m)
+                    throw new ValidationException($"Exchange rate from '{rates.Key}' to '{source}' is zero and cannot be reversed.");
+
+                if (directNeighbors != null && directNeighbors.ContainsKey(rates.Key))
+                    continue;
+
+                yield return new KeyValuePair<IAsset, decimal>(rates.Key, 1m / reverseRate);
+            }
         }
 
         private void AddRate(IAsset source, IAsset destination, decimal rate)

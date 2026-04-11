@@ -46,7 +46,7 @@ namespace Ledger.Reports
             var book = new Book(Book);
             var balance = ledger.GetBalanceAtOrBefore(book, Index);
             var capitalBalanceItems = balance.Items.GetBalanceItemsCombined(new QueryAccountPredicate("Equity:Capital:**"));
-            var exchangeRates = ExchangeRates.Load(ExchangeRatesPath);
+            IRateProvider rateProvider = FileRateProvider.Load(ExchangeRatesPath);
             var netWorth = 0m;
 
             foreach (var capitalBalanceItem in capitalBalanceItems)
@@ -60,7 +60,7 @@ namespace Ledger.Reports
                     continue;
                 }
 
-                netWorth += sourceAssetNetWorth * exchangeRates.GetRate(sourceAsset, Asset);
+                netWorth += sourceAssetNetWorth * rateProvider.GetRate(sourceAsset, Asset);
             }
 
             return new NetWorthReport(new NetWorthReport.ReportItem
@@ -70,13 +70,18 @@ namespace Ledger.Reports
             });
         }
 
-        private class ExchangeRates
+        private interface IRateProvider
+        {
+            decimal GetRate(IAsset source, IAsset destination);
+        }
+
+        private class FileRateProvider : IRateProvider
         {
             private readonly Dictionary<IAsset, Dictionary<IAsset, decimal>> _graph = new Dictionary<IAsset, Dictionary<IAsset, decimal>>();
 
-            public static ExchangeRates Load(string path)
+            public static FileRateProvider Load(string path)
             {
-                var result = new ExchangeRates();
+                var result = new FileRateProvider();
 
                 if (string.IsNullOrWhiteSpace(path))
                     return result;

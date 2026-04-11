@@ -48,6 +48,22 @@ namespace Ledger.Journal
             if (source.Equals(destination))
                 return 1m;
 
+            if (TryGetRate(source, destination, out var rate))
+                return rate;
+
+            if (TryGetRate(destination, source, out var reverseRate))
+            {
+                if (reverseRate == 0m)
+                    throw new ValidationException($"Exchange rate from '{destination}' to '{source}' is zero and cannot be reversed.");
+
+                return 1m / reverseRate;
+            }
+
+            throw new ValidationException($"No exchange rate available from '{source}' to '{destination}'.");
+        }
+
+        private bool TryGetRate(IAsset source, IAsset destination, out decimal rate)
+        {
             var queue = new Queue<(IAsset Asset, decimal Rate)>();
             var visited = new HashSet<IAsset>();
             queue.Enqueue((source, 1m));
@@ -68,14 +84,18 @@ namespace Ledger.Journal
                     var nextRate = current.Rate * neighbor.Value;
 
                     if (neighbor.Key.Equals(destination))
-                        return nextRate;
+                    {
+                        rate = nextRate;
+                        return true;
+                    }
 
                     visited.Add(neighbor.Key);
                     queue.Enqueue((neighbor.Key, nextRate));
                 }
             }
 
-            throw new ValidationException($"No exchange rate available from '{source}' to '{destination}'.");
+            rate = 0m;
+            return false;
         }
 
         private void AddRate(IAsset source, IAsset destination, decimal rate)

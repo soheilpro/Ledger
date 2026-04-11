@@ -18,11 +18,21 @@ namespace Ledger.Commands
             }
         }
 
+        public override string[] Aliases
+        {
+            get
+            {
+                return new[] {
+                    "nw",
+                };
+            }
+        }
+
         public override string Arguments
         {
             get
             {
-                return "asset [--at index]";
+                return "<asset> [--at index]";
             }
         }
 

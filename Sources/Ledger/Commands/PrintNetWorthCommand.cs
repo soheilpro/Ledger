@@ -3,6 +3,7 @@ using System.IO;
 using System.Linq;
 using CommandLine;
 using Ledger.Core;
+using Ledger.Journal;
 using Ledger.Reports;
 
 namespace Ledger.Commands
@@ -67,7 +68,7 @@ namespace Ledger.Commands
             reportBuilder.Book = "default";
             reportBuilder.Index = ResolveIndex(options.Index, context, false);
             reportBuilder.Asset = new Asset(options.AssetId);
-            reportBuilder.ExchangeRatesPath = Path.Combine(Path.GetDirectoryName(context.JournalManager.JournalPath) ?? string.Empty, "exchange.txt");
+            reportBuilder.RateProvider = FileRateProvider.Load(Path.Combine(Path.GetDirectoryName(context.JournalManager.JournalPath) ?? string.Empty, "exchange.txt"));
 
             var report = reportBuilder.GetReport();
 

@@ -30,7 +30,7 @@ namespace Ledger.Reports
             set;
         }
 
-        public string ExchangeRatesPath
+        public IRateProvider RateProvider
         {
             get;
             set;
@@ -42,7 +42,7 @@ namespace Ledger.Reports
             var book = new Book(Book);
             var balance = ledger.GetBalanceAtOrBefore(book, Index);
             var capitalBalanceItems = balance.Items.GetBalanceItemsCombined(new QueryAccountPredicate("Equity:Capital:**"));
-            IRateProvider rateProvider = FileRateProvider.Load(ExchangeRatesPath);
+            var rateProvider = RateProvider ?? throw new ValidationException($"{nameof(RateProvider)} is not set.");
             var netWorth = 0m;
 
             foreach (var capitalBalanceItem in capitalBalanceItems)

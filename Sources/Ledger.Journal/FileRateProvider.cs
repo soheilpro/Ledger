@@ -10,6 +10,7 @@ namespace Ledger.Journal
     public class FileRateProvider : IRateProvider
     {
         private readonly Dictionary<IAsset, Dictionary<IAsset, decimal>> _graph = new Dictionary<IAsset, Dictionary<IAsset, decimal>>();
+        private readonly Dictionary<IAsset, Dictionary<IAsset, decimal>> _reverseGraph = new Dictionary<IAsset, Dictionary<IAsset, decimal>>();
 
         public static FileRateProvider Load(string path)
         {
@@ -94,18 +95,20 @@ namespace Ledger.Journal
                     yield return directNeighbor;
             }
 
-            foreach (var rates in _graph)
+            if (!_reverseGraph.TryGetValue(source, out var reverseNeighbors))
+                yield break;
+
+            foreach (var reverseNeighbor in reverseNeighbors)
             {
-                if (!rates.Value.TryGetValue(source, out var reverseRate))
-                    continue;
+                var reverseRate = reverseNeighbor.Value;
 
                 if (reverseRate == 0m)
-                    throw new ValidationException($"Exchange rate from '{rates.Key}' to '{source}' is zero and cannot be reversed.");
+                    throw new ValidationException($"Exchange rate from '{reverseNeighbor.Key}' to '{source}' is zero and cannot be reversed.");
 
-                if (directNeighbors != null && directNeighbors.ContainsKey(rates.Key))
+                if (directNeighbors != null && directNeighbors.ContainsKey(reverseNeighbor.Key))
                     continue;
 
-                yield return new KeyValuePair<IAsset, decimal>(rates.Key, 1m / reverseRate);
+                yield return new KeyValuePair<IAsset, decimal>(reverseNeighbor.Key, 1m / reverseRate);
             }
         }
 
@@ -115,6 +118,11 @@ namespace Ledger.Journal
                 _graph[source] = new Dictionary<IAsset, decimal>();
 
             _graph[source][destination] = rate;
+
+            if (!_reverseGraph.ContainsKey(destination))
+                _reverseGraph[destination] = new Dictionary<IAsset, decimal>();
+
+            _reverseGraph[destination][source] = rate;
         }
     }
 }

@@ -17,7 +17,7 @@ namespace Ledger.Reports
         {
             var table = new Table();
             table.Columns.Add(new TableAssetColumn<ReportItem>("Asset", row => row.Asset));
-            table.Columns.Add(new TableAmountColumn<ReportItem>("Net Worth", row => row.NetWorth));
+            table.Columns.Add(new TableAmountColumn<ReportItem>("Value", row => row.Value));
             table.Rows = new[] { _reportItem };
             table.PrintText(writer);
         }
@@ -30,7 +30,7 @@ namespace Ledger.Reports
                 set;
             }
 
-            public decimal NetWorth
+            public decimal Value
             {
                 get;
                 set;

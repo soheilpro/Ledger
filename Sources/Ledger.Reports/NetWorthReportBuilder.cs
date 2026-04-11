@@ -42,7 +42,7 @@ namespace Ledger.Reports
             var book = new Book(Book);
             var balance = ledger.GetBalanceAtOrBefore(book, Index);
             var capitalBalanceItems = balance.Items.GetBalanceItemsCombined(new QueryAccountPredicate("Equity:Capital:**"));
-            var netWorth = 0m;
+            var value = 0m;
 
             foreach (var capitalBalanceItem in capitalBalanceItems)
             {
@@ -51,17 +51,17 @@ namespace Ledger.Reports
 
                 if (sourceAsset.Equals(Asset))
                 {
-                    netWorth += sourceAssetNetWorth;
+                    value += sourceAssetNetWorth;
                     continue;
                 }
 
-                netWorth += sourceAssetNetWorth * RateProvider.GetRate(sourceAsset, Asset);
+                value += sourceAssetNetWorth * RateProvider.GetRate(sourceAsset, Asset);
             }
 
             return new NetWorthReport(new NetWorthReport.ReportItem
             {
                 Asset = Asset,
-                NetWorth = netWorth,
+                Value = value,
             });
         }
 

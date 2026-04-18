@@ -1,5 +1,4 @@
 using System;
-using System.IO;
 using System.Linq;
 using CommandLine;
 using Ledger.Core;
@@ -71,6 +70,13 @@ namespace Ledger.Commands
 
         protected override void Execute(PrintNetWorthOptions options, IContext context)
         {
+            if (string.IsNullOrWhiteSpace(context.RatesPath))
+            {
+                ConsoleHelper.PrintError("Missing rates file. Start ledger with '--rates <path>'.");
+                context.ShouldExit = true;
+                return;
+            }
+
             context.JournalManager.ReloadJournal();
 
             var reportBuilder = new NetWorthReportBuilder();
@@ -78,7 +84,7 @@ namespace Ledger.Commands
             reportBuilder.Book = "default";
             reportBuilder.Index = ResolveIndex(options.Index, context, false);
             reportBuilder.Asset = new Asset(options.AssetId);
-            reportBuilder.RateProvider = FileRateProvider.Load(Path.Combine(Path.GetDirectoryName(context.JournalManager.JournalPath) ?? string.Empty, "rates.txt"));
+            reportBuilder.RateProvider = FileRateProvider.Load(context.RatesPath);
 
             var report = reportBuilder.GetReport();
 

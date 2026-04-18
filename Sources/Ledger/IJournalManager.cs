@@ -10,11 +10,6 @@ namespace Ledger
             get;
         }
 
-        string JournalPath
-        {
-            get;
-        }
-
         string[] AccountIds
         {
             get;

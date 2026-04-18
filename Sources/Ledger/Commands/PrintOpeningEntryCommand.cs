@@ -37,7 +37,7 @@ namespace Ledger.Commands
         public override string[] GetSuggestions(string arg, int index, IContext context)
         {
             if (arg.StartsWith("--"))
-                return GetOptionSuggesions(arg, index, context, new string[] { "at" });
+                return GetOptionSuggestions(arg, index, context, new string[] { "at" });
 
             return base.GetSuggestions(arg, index, context);
         }

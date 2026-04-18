@@ -47,10 +47,10 @@ namespace Ledger.Commands
         public override string[] GetSuggestions(string arg, int index, IContext context)
         {
             if (arg.StartsWith("--"))
-                return GetOptionSuggesions(arg, index, context, new string[] { "at", "asset" });
+                return GetOptionSuggestions(arg, index, context, new string[] { "at", "asset" });
 
             if (arg.StartsWith("@"))
-                return GetMarkSuggesions(arg, index, context);
+                return GetMarkSuggestions(arg, index, context);
 
             return base.GetSuggestions(arg, index, context);
         }

@@ -9,6 +9,12 @@ namespace Ledger
             get;
         }
 
+        string RatesPath
+        {
+            get;
+            set;
+        }
+
         bool ShouldExit
         {
             get;

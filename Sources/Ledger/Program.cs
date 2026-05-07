@@ -11,7 +11,7 @@ namespace Ledger
 
             parser.ParseArguments<Options>(args)
                 .WithParsed<Options>(Run)
-                .WithNotParsed((errors) => Console.WriteLine($"Usage: ledger <journal>"));
+                .WithNotParsed((errors) => Console.WriteLine($"Usage: ledger <journal> [--rates <path>]"));
         }
 
         private static void Run(Options options)
@@ -20,6 +20,7 @@ namespace Ledger
 
             var context = new Context();
             context.JournalManager = journalManager;
+            context.RatesPath = options.RatesPath;
 
             var controller = new Controller(context);
 
@@ -30,6 +31,13 @@ namespace Ledger
         {
             [Value(0, MetaName = "JournalPath", Required = true, HelpText = "Path to the journal file.")]
             public string JournalPath
+            {
+                get;
+                set;
+            }
+
+            [Option("rates", HelpText = "Path to rates file.")]
+            public string RatesPath
             {
                 get;
                 set;

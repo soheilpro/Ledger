@@ -89,7 +89,7 @@ namespace Ledger.Core
 
             var entryItemAccountGroups = sourceEntry.Items
                 .GroupBy(item => new { item.Account, item.Book })
-                .Select(group => new { group.Key.Account, group.Key.Book })
+                .Select(group => group.Key)
                 .ToList();
 
             foreach (var entryItemAccountGroup in entryItemAccountGroups)

@@ -196,11 +196,24 @@ namespace Ledger.Core
 
         public IEnumerator<TItem> GetEnumerator()
         {
-            var result = new List<TItem>();
+            return EnumerateItems().GetEnumerator();
+        }
 
-            _rootNode.GetAllItems(result);
+        private IEnumerable<TItem> EnumerateItems()
+        {
+            var nodes = new Stack<Node>();
+            nodes.Push(_rootNode);
 
-            return result.GetEnumerator();
+            while (nodes.Count > 0)
+            {
+                var node = nodes.Pop();
+
+                foreach (var item in node.Items)
+                    yield return item;
+
+                foreach (var childNode in node.ChildNodes.GetValues())
+                    nodes.Push(childNode);
+            }
         }
 
         IEnumerator IEnumerable.GetEnumerator()
@@ -287,7 +300,7 @@ namespace Ledger.Core
 
         protected class NodeDictionary
         {
-            private const int Capacity = 8;
+            private const int Capacity = 16;
             private Bucket[] _buckets;
             private int _size = 0;
             private NodeDictionary _source;

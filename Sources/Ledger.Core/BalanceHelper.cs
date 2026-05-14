@@ -20,15 +20,28 @@ namespace Ledger.Core
 
                 var balanceItems = sourceBalance.Items.GetBalanceItems(accountMapItem.AccountPredicate);
 
-                if (!balanceItems.Any())
+                IAsset firstAsset = null;
+                decimal totalDebit = 0;
+                decimal totalCredit = 0;
+
+                foreach (var balanceItem in balanceItems)
+                {
+                    if (firstAsset == null)
+                        firstAsset = balanceItem.Asset;
+
+                    totalDebit += balanceItem.TotalDebit;
+                    totalCredit += balanceItem.TotalCredit;
+                }
+
+                if (firstAsset == null)
                     continue;
 
                 var newBalanceItem = new BalanceItem();
                 newBalanceItem.Balance = destinationBalance;
                 newBalanceItem.Account = accountMapItem.Account;
-                newBalanceItem.Asset = balanceItems.First().Asset;
-                newBalanceItem.TotalDebit = balanceItems.Sum(balanceItem => balanceItem.TotalDebit);
-                newBalanceItem.TotalCredit = balanceItems.Sum(balanceItem => balanceItem.TotalCredit);
+                newBalanceItem.Asset = firstAsset;
+                newBalanceItem.TotalDebit = totalDebit;
+                newBalanceItem.TotalCredit = totalCredit;
 
                 destinationBalance.Items.Add(newBalanceItem);
 

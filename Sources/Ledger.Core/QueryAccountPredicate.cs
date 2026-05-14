@@ -39,7 +39,7 @@ namespace Ledger.Core
 
         private bool MatchesCore(IAccount account)
         {
-            var idParts = ((Account)account).Id.Split(':');
+            var idParts = ((Account)account).IdParts;
             var index = -1;
 
             while (true)

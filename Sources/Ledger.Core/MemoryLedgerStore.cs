@@ -7,7 +7,7 @@ namespace Ledger.Core
     public class MemoryLedgerStore : ILedgerStore
     {
         private IList<IEntry> _entries = new List<IEntry>();
-        private IList<IEntryItem> _entryItems = new List<IEntryItem>();
+        private IDictionary<IBook, IList<IEntryItem>> _entryItemsByBook = new Dictionary<IBook, IList<IEntryItem>>();
         private IDictionary<IBook, IList<IBalance>> _balancesMap = new Dictionary<IBook, IList<IBalance>>();
 
         public virtual void Store(IEntry entry, ICollection<IBalance> balances)
@@ -15,7 +15,17 @@ namespace Ledger.Core
             _entries.Add(entry);
 
             foreach (var entryItem in entry.Items)
-                _entryItems.Add(entryItem);
+            {
+                IList<IEntryItem> bookItems;
+
+                if (!_entryItemsByBook.TryGetValue(entryItem.Book, out bookItems))
+                {
+                    bookItems = new List<IEntryItem>();
+                    _entryItemsByBook[entryItem.Book] = bookItems;
+                }
+
+                bookItems.Add(entryItem);
+            }
 
             foreach (var balance in balances)
             {
@@ -57,7 +67,17 @@ namespace Ledger.Core
 
         public virtual ICollection<IEntry> GetEntries(ICollection<IComparable> indexes)
         {
-            return _entries.Where(entry => indexes.Any(index => entry.Index.CompareTo(index) == 0)).ToList();
+            var result = new List<IEntry>(indexes.Count);
+
+            foreach (var index in indexes)
+            {
+                var i = FindIndex(_entries, index, inclusive: true, direction: 0);
+
+                if (i >= 0)
+                    result.Add(_entries[i]);
+            }
+
+            return result;
         }
 
         public virtual ICollection<IEntry> GetEntries(IComparable startIndex, bool startInclusive, IComparable endIndex, bool endInclusive, bool reverse = false, int count = int.MaxValue)
@@ -75,7 +95,12 @@ namespace Ledger.Core
 
         public ICollection<IEntryItem> GetEntryItems(IBook book, IAccountPredicate accountPredicate, IComparable startIndex, bool startInclusive, IComparable endIndex, bool endInclusive)
         {
-            var result = _entryItems.Where(x => x.Book.Equals(book));
+            IList<IEntryItem> bookItems;
+
+            if (!_entryItemsByBook.TryGetValue(book, out bookItems))
+                return new List<IEntryItem>();
+
+            var result = bookItems.AsEnumerable();
 
             if (startIndex != null)
             {
@@ -108,7 +133,18 @@ namespace Ledger.Core
 
         public virtual ICollection<IBalance> GetBalances(IBook book, IEnumerable<IComparable> indexes)
         {
-            return GetBalances(book).Where(balance => indexes.Any(index => balance.Index.CompareTo(index) == 0)).ToList();
+            var balances = GetBalances(book);
+            var result = new List<IBalance>();
+
+            foreach (var index in indexes)
+            {
+                var i = FindIndex(balances, index, inclusive: true, direction: 0);
+
+                if (i >= 0)
+                    result.Add(balances[i]);
+            }
+
+            return result;
         }
 
         public virtual ICollection<IBalance> GetBalances(IBook book, IComparable startIndex, bool startInclusive, IComparable endIndex, bool endInclusive, bool reverse = false, int count = int.MaxValue)

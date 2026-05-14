@@ -84,7 +84,7 @@ namespace Ledger.Core
         {
             // Performance.MarkStart("EntryHelper.Validate");
 
-            var matches = new List<Tuple<IAccount, IAccount, IAccountPredicate>>();
+            var matches = new Dictionary<IAccount, (IAccount Target, IAccountPredicate Predicate)>();
 
             var entryItemAccountGroups = sourceEntry.Items.GroupBy(item => new {item.Account, item.Book}).ToList();
             foreach (var entryItemAccountGroup in entryItemAccountGroups)
@@ -100,22 +100,22 @@ namespace Ledger.Core
 
                     if (accountMapItem.Account == null)
                     {
-                        matches.Add(Tuple.Create(account, accountMapItem.Account, accountMapItem.AccountPredicate));
+                        matches[account] = (null, accountMapItem.AccountPredicate);
                         continue;
                     }
 
-                    var duplicateItem = matches.SingleOrDefault(x => x.Item1.Equals(account));
+                    (IAccount Target, IAccountPredicate Predicate) existingMatch;
 
-                    if (duplicateItem != null)
-                        throw new ValidationException(string.Format("Duplicate selected account:{0}{1}{0}{2} -> {3}{0}{4} -> {5}", Environment.NewLine, account, duplicateItem.Item3, duplicateItem.Item2, accountMapItem.AccountPredicate, accountMapItem.Account));
+                    if (matches.TryGetValue(account, out existingMatch) && existingMatch.Target != null)
+                        throw new ValidationException(string.Format("Duplicate selected account:{0}{1}{0}{2} -> {3}{0}{4} -> {5}", Environment.NewLine, account, existingMatch.Predicate, existingMatch.Target, accountMapItem.AccountPredicate, accountMapItem.Account));
 
-                    matches.Add(Tuple.Create(account, accountMapItem.Account, accountMapItem.AccountPredicate));
+                    matches[account] = (accountMapItem.Account, accountMapItem.AccountPredicate);
                 }
             }
 
-            if (matches.Select(x => x.Item1).Distinct().Count() != entryItemAccountGroups.Count())
+            if (matches.Count != entryItemAccountGroups.Count)
             {
-                var missedAccounts = sourceEntry.Items.Select(x => x.Account).Except(matches.Select(x => x.Item1)).ToList();
+                var missedAccounts = entryItemAccountGroups.Select(g => g.First().Account).Except(matches.Keys).ToList();
 
                 throw new ValidationException($"Missed accounts:{Environment.NewLine}{string.Join(Environment.NewLine, missedAccounts)}");
             }

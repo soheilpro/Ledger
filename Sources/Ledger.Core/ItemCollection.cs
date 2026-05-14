@@ -287,6 +287,8 @@ namespace Ledger.Core
 
         protected class NodeDictionary
         {
+            private const int LoadFactorNumerator = 3;
+            private const int LoadFactorDenominator = 4;
             private int _capacity;
             private Bucket[] _buckets;
             private int _size = 0;
@@ -328,7 +330,7 @@ namespace Ledger.Core
                     _source = null;
                 }
 
-                if ((_size + 1) * 4 > _capacity * 3)
+                if ((_size + 1) * LoadFactorDenominator > _capacity * LoadFactorNumerator)
                     Resize(_capacity * 2);
 
                 var hashCode = key.GetHashCode() & 0x7FFFFFFF;

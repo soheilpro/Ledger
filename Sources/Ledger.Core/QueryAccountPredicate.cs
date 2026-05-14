@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 
 namespace Ledger.Core
 {
@@ -7,6 +8,7 @@ namespace Ledger.Core
         private string _query;
         private string[] _queryParts;
         private string[][] _queryOrParts;
+        private readonly IDictionary<string, string[]> _idPartsCache = new Dictionary<string, string[]>(StringComparer.Ordinal);
 
         public string Query
         {
@@ -45,7 +47,22 @@ namespace Ledger.Core
         private bool MatchesCore(IAccount account)
         {
             var accountModel = account as Account;
-            var idParts = accountModel != null ? accountModel.IdParts : account.ToString().Split(':');
+            string[] idParts;
+
+            if (accountModel != null)
+            {
+                idParts = accountModel.IdParts;
+            }
+            else
+            {
+                var accountId = account.ToString();
+                if (!_idPartsCache.TryGetValue(accountId, out idParts))
+                {
+                    idParts = accountId.Split(':');
+                    _idPartsCache[accountId] = idParts;
+                }
+            }
+
             var index = -1;
 
             while (true)

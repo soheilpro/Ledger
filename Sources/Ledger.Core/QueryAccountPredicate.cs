@@ -6,6 +6,7 @@ namespace Ledger.Core
     {
         private string _query;
         private string[] _queryParts;
+        private string[][] _queryOrParts;
 
         public string Query
         {
@@ -20,10 +21,22 @@ namespace Ledger.Core
             }
         }
 
+        public string[][] QueryOrParts
+        {
+            get
+            {
+                return _queryOrParts;
+            }
+        }
+
         public QueryAccountPredicate(string query)
         {
             _query = query;
             _queryParts = query.Split(':');
+
+            _queryOrParts = new string[_queryParts.Length][];
+            for (var i = 0; i < _queryParts.Length; i++)
+                _queryOrParts[i] = _queryParts[i].Split('|');
         }
 
         public bool Matches(IAccount account)
@@ -39,7 +52,7 @@ namespace Ledger.Core
 
         private bool MatchesCore(IAccount account)
         {
-            var idParts = ((Account)account).Id.Split(':');
+            var idParts = ((Account)account).IdParts;
             var index = -1;
 
             while (true)
@@ -68,7 +81,7 @@ namespace Ledger.Core
                 // Easy.
                 var matches = false;
 
-                foreach (var queryOrPart in _queryParts[index].Split('|'))
+                foreach (var queryOrPart in _queryOrParts[index])
                 {
                     // If it starts with ^ is should not equal to match.
                     if (queryOrPart.StartsWith("^", StringComparison.Ordinal))

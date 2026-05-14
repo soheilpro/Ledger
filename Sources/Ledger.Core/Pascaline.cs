@@ -34,7 +34,7 @@ namespace Ledger.Core
             {
                 // Performance.MarkStart($"Pascaline.AddEvents:GetEvents({eventProvider})");
 
-                events.AddRange(eventProvider.GetEvents().ToList());
+                events.AddRange(eventProvider.GetEvents());
 
                 // Performance.MarkEnd($"Pascaline.AddEvents:GetEvents({eventProvider})");
             }

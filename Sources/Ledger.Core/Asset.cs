@@ -4,14 +4,28 @@ namespace Ledger.Core
 {
     public class Asset : IAsset
     {
+        private string[] _idParts;
+
         public string Id {
             get;
             set;
         }
 
+        public string[] IdParts
+        {
+            get
+            {
+                if (_idParts == null)
+                    _idParts = Id.Split(':');
+
+                return _idParts;
+            }
+        }
+
         public Asset(string id)
         {
             Id = id;
+            _idParts = id.Split(':');
         }
 
         public override bool Equals(object other)

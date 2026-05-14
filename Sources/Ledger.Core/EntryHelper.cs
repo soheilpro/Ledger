@@ -85,30 +85,36 @@ namespace Ledger.Core
             // Performance.MarkStart("EntryHelper.Validate");
 
             var matches = new List<Tuple<IAccount, IAccount, IAccountPredicate>>();
+            var matchedAccounts = new HashSet<IAccount>();
 
             var entryItemAccountGroups = sourceEntry.Items.GroupBy(item => new {item.Account, item.Book}).ToList();
             foreach (var entryItemAccountGroup in entryItemAccountGroups)
             {
+                var account = entryItemAccountGroup.Key.Account;
+                var book = entryItemAccountGroup.Key.Book;
+
                 foreach (var accountMapItem in accountMap.Items)
                 {
-                    if (!accountMapItem.Book.Equals(entryItemAccountGroup.First().Book))
+                    if (!accountMapItem.Book.Equals(book))
                         continue;
 
-                    var account = entryItemAccountGroup.First().Account;
                     if (!accountMapItem.AccountPredicate.Matches(account))
                         continue;
 
                     if (accountMapItem.Account == null)
                     {
+                        matchedAccounts.Add(account);
                         matches.Add(Tuple.Create(account, accountMapItem.Account, accountMapItem.AccountPredicate));
                         continue;
                     }
 
-                    var duplicateItem = matches.SingleOrDefault(x => x.Item1.Equals(account));
-
-                    if (duplicateItem != null)
+                    if (matchedAccounts.Contains(account))
+                    {
+                        var duplicateItem = matches.First(x => x.Item1.Equals(account));
                         throw new ValidationException(string.Format("Duplicate selected account:{0}{1}{0}{2} -> {3}{0}{4} -> {5}", Environment.NewLine, account, duplicateItem.Item3, duplicateItem.Item2, accountMapItem.AccountPredicate, accountMapItem.Account));
+                    }
 
+                    matchedAccounts.Add(account);
                     matches.Add(Tuple.Create(account, accountMapItem.Account, accountMapItem.AccountPredicate));
                 }
             }

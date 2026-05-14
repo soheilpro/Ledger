@@ -48,15 +48,16 @@ namespace Ledger.Core
             if (lastEntry != null && entry.Index.CompareTo(_store.GetLastEntry().Index) <= 0)
                 throw new ValidationException($"Entry ({entry}) cannot occur on or before the last entry ({lastEntry}).");
 
+            var balancesDict = new Dictionary<IBook, IBalance>();
             var balances = new List<IBalance>();
 
             foreach (var entryItem in entry.Items)
             {
-                var balance = balances.SingleOrDefault(x => x.Book.Equals(entryItem.Book));
-
-                if (balance == null)
+                IBalance balance;
+                if (!balancesDict.TryGetValue(entryItem.Book, out balance))
                 {
                     balance = CreateBalance(entryItem.Book, entry.Index);
+                    balancesDict[entryItem.Book] = balance;
                     balances.Add(balance);
                 }
 

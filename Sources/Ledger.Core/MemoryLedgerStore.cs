@@ -7,15 +7,11 @@ namespace Ledger.Core
     public class MemoryLedgerStore : ILedgerStore
     {
         private IList<IEntry> _entries = new List<IEntry>();
-        private IList<IEntryItem> _entryItems = new List<IEntryItem>();
         private IDictionary<IBook, IList<IBalance>> _balancesMap = new Dictionary<IBook, IList<IBalance>>();
 
         public virtual void Store(IEntry entry, ICollection<IBalance> balances)
         {
             _entries.Add(entry);
-
-            foreach (var entryItem in entry.Items)
-                _entryItems.Add(entryItem);
 
             foreach (var balance in balances)
             {
@@ -57,7 +53,8 @@ namespace Ledger.Core
 
         public virtual ICollection<IEntry> GetEntries(ICollection<IComparable> indexes)
         {
-            return _entries.Where(entry => indexes.Any(index => entry.Index.CompareTo(index) == 0)).ToList();
+            var indexSet = new HashSet<IComparable>(indexes);
+            return _entries.Where(entry => indexSet.Contains(entry.Index)).ToList();
         }
 
         public virtual ICollection<IEntry> GetEntries(IComparable startIndex, bool startInclusive, IComparable endIndex, bool endInclusive, bool reverse = false, int count = int.MaxValue)
@@ -75,25 +72,11 @@ namespace Ledger.Core
 
         public ICollection<IEntryItem> GetEntryItems(IBook book, IAccountPredicate accountPredicate, IComparable startIndex, bool startInclusive, IComparable endIndex, bool endInclusive)
         {
-            var result = _entryItems.Where(x => x.Book.Equals(book));
-
-            if (startIndex != null)
-            {
-                if (startInclusive)
-                    result = result.Where(x => x.Entry.Index.CompareTo(startIndex) >= 0);
-                else
-                    result = result.Where(x => x.Entry.Index.CompareTo(startIndex) > 0);
-            }
-
-            if (endIndex != null)
-            {
-                if (endInclusive)
-                    result = result.Where(x => x.Entry.Index.CompareTo(endIndex) <= 0);
-                else
-                    result = result.Where(x => x.Entry.Index.CompareTo(endIndex) < 0);
-            }
-
-            return result.Where(x => accountPredicate.Matches(x.Account)).ToList();
+            var entries = GetRange(_entries, startIndex, startInclusive, endIndex, endInclusive, int.MaxValue);
+            return entries
+                .SelectMany(e => e.Items)
+                .Where(x => x.Book.Equals(book) && accountPredicate.Matches(x.Account))
+                .ToList();
         }
 
         public virtual IBalance GetLastBalance(IBook book)
@@ -108,7 +91,8 @@ namespace Ledger.Core
 
         public virtual ICollection<IBalance> GetBalances(IBook book, IEnumerable<IComparable> indexes)
         {
-            return GetBalances(book).Where(balance => indexes.Any(index => balance.Index.CompareTo(index) == 0)).ToList();
+            var indexSet = new HashSet<IComparable>(indexes);
+            return GetBalances(book).Where(balance => indexSet.Contains(balance.Index)).ToList();
         }
 
         public virtual ICollection<IBalance> GetBalances(IBook book, IComparable startIndex, bool startInclusive, IComparable endIndex, bool endInclusive, bool reverse = false, int count = int.MaxValue)

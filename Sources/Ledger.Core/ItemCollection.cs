@@ -96,11 +96,16 @@ namespace Ledger.Core
 
             if (predicate is QueryAccountPredicate)
             {
-                FindItemsByQueryParts(_rootNode, ((QueryAccountPredicate)predicate).QueryParts, 0, result);
+                var qap = (QueryAccountPredicate)predicate;
+                FindItemsByQueryParts(_rootNode, qap.QueryParts, qap.QueryOrParts, 0, result);
             }
             else if (predicate is OrAccountPredicate)
             {
-                result = ((OrAccountPredicate)predicate).Predicates.SelectMany(FindItems).Distinct().ToList();
+                var hashSet = new HashSet<TItem>();
+                foreach (var subPredicate in ((OrAccountPredicate)predicate).Predicates)
+                    foreach (var item in FindItems(subPredicate))
+                        hashSet.Add(item);
+                result = new List<TItem>(hashSet);
             }
             else if (predicate is AndAccountPredicate)
             {
@@ -127,7 +132,7 @@ namespace Ledger.Core
             result.AddRange(node.Items);
         }
 
-        private void FindItemsByQueryParts(Node node, string[] queryParts, int queryPartsStartIndex, List<TItem> result)
+        private void FindItemsByQueryParts(Node node, string[] queryParts, string[][] queryOrParts, int queryPartsStartIndex, List<TItem> result)
         {
             for (var queryPartIndex = queryPartsStartIndex; queryPartIndex < queryParts.Length; queryPartIndex++)
             {
@@ -143,22 +148,22 @@ namespace Ledger.Core
                 if (queryPart == "*")
                 {
                     foreach (var childNode in node.ChildNodes.GetValues())
-                        FindItemsByQueryParts(childNode, queryParts, queryPartIndex + 1, result);
+                        FindItemsByQueryParts(childNode, queryParts, queryOrParts, queryPartIndex + 1, result);
 
                     return;
                 }
 
-                if (Contains(queryPart, '|'))
-                {
-                    var orQueryParts = queryPart.Split('|');
+                var orParts = queryOrParts[queryPartIndex];
 
+                if (orParts.Length > 1)
+                {
                     foreach (var childNode in node.ChildNodes.GetPairs())
                     {
-                        for (var orQueryPartIndex = 0; orQueryPartIndex < orQueryParts.Length; orQueryPartIndex++)
+                        for (var orQueryPartIndex = 0; orQueryPartIndex < orParts.Length; orQueryPartIndex++)
                         {
-                            var orQueryPart = orQueryParts[orQueryPartIndex];
+                            var orQueryPart = orParts[orQueryPartIndex];
                             if (childNode.Key == orQueryPart)
-                                FindItemsByQueryParts(childNode.Value, queryParts, queryPartIndex + 1, result);
+                                FindItemsByQueryParts(childNode.Value, queryParts, queryOrParts, queryPartIndex + 1, result);
                         }
                     }
 
@@ -171,7 +176,7 @@ namespace Ledger.Core
 
                     foreach (var childNode in node.ChildNodes.GetPairs())
                         if (childNode.Key != notQueryPart)
-                            FindItemsByQueryParts(childNode.Value, queryParts, queryPartIndex + 1, result);
+                            FindItemsByQueryParts(childNode.Value, queryParts, queryOrParts, queryPartIndex + 1, result);
 
                     return;
                 }
@@ -183,15 +188,6 @@ namespace Ledger.Core
             }
 
             result.AddRange(node.Items);
-        }
-
-        private static bool Contains(string str, char character)
-        {
-            for (var i = 0; i < str.Length; i++)
-                if (str[i] == character)
-                    return true;
-
-            return false;
         }
 
         public IEnumerator<TItem> GetEnumerator()
@@ -287,14 +283,14 @@ namespace Ledger.Core
 
         protected class NodeDictionary
         {
-            private const int Capacity = 8;
+            private const int InitialCapacity = 16;
             private Bucket[] _buckets;
             private int _size = 0;
             private NodeDictionary _source;
 
             public NodeDictionary()
             {
-                _buckets = new Bucket[Capacity];
+                _buckets = new Bucket[InitialCapacity];
             }
 
             public NodeDictionary(NodeDictionary source)
@@ -313,9 +309,9 @@ namespace Ledger.Core
             {
                 if (_source != null)
                 {
-                    _buckets = new Bucket[Capacity];
+                    _buckets = new Bucket[InitialCapacity];
 
-                    for (var i = 0; i < Capacity; i++)
+                    for (var i = 0; i < InitialCapacity; i++)
                     {
                         var sourceBucket = _source._buckets[i];
 
@@ -327,7 +323,7 @@ namespace Ledger.Core
                 }
 
                 var hashCode = key.GetHashCode() & 0x7FFFFFFF;
-                var index = hashCode % Capacity;
+                var index = hashCode % InitialCapacity;
 
                 var bucket = _buckets[index];
 
@@ -343,7 +339,7 @@ namespace Ledger.Core
             public bool TryGetValue(string key, out Node value)
             {
                 var hashCode = key.GetHashCode() & 0x7FFFFFFF;
-                var index = hashCode % Capacity;
+                var index = hashCode % InitialCapacity;
 
                 var bucket = _buckets[index];
 
@@ -358,7 +354,7 @@ namespace Ledger.Core
 
             public IEnumerable<Node> GetValues()
             {
-                for (var i = 0; i < Capacity; i++)
+                for (var i = 0; i < InitialCapacity; i++)
                 {
                     var bucket = _buckets[i];
 
@@ -370,7 +366,7 @@ namespace Ledger.Core
 
             public IEnumerable<KeyValuePair<string, Node>> GetPairs()
             {
-                for (var i = 0; i < Capacity; i++)
+                for (var i = 0; i < InitialCapacity; i++)
                 {
                     var bucket = _buckets[i];
 

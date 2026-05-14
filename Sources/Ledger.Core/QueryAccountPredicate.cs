@@ -44,7 +44,8 @@ namespace Ledger.Core
 
         private bool MatchesCore(IAccount account)
         {
-            var idParts = ((Account)account).IdParts;
+            var accountModel = account as Account;
+            var idParts = accountModel != null ? accountModel.IdParts : account.ToString().Split(':');
             var index = -1;
 
             while (true)

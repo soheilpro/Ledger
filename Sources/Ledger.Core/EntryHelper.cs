@@ -88,18 +88,18 @@ namespace Ledger.Core
             var firstMatchBySourceAccount = new Dictionary<IAccount, Tuple<IAccount, IAccount, IAccountPredicate>>();
 
             var entryItemAccountGroups = sourceEntry.Items
-                .GroupBy(item => new { item.Account, item.Book })
-                .Select(group => group.Key)
+                .Select(item => Tuple.Create(item.Account, item.Book))
+                .Distinct()
                 .ToList();
 
             foreach (var entryItemAccountGroup in entryItemAccountGroups)
             {
                 foreach (var accountMapItem in accountMap.Items)
                 {
-                    if (!accountMapItem.Book.Equals(entryItemAccountGroup.Book))
+                    if (!accountMapItem.Book.Equals(entryItemAccountGroup.Item2))
                         continue;
 
-                    var account = entryItemAccountGroup.Account;
+                    var account = entryItemAccountGroup.Item1;
                     if (!accountMapItem.AccountPredicate.Matches(account))
                         continue;
 

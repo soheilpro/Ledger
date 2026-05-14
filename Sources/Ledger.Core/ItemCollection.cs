@@ -287,18 +287,20 @@ namespace Ledger.Core
 
         protected class NodeDictionary
         {
-            private const int Capacity = 8;
+            private int _capacity;
             private Bucket[] _buckets;
             private int _size = 0;
             private NodeDictionary _source;
 
             public NodeDictionary()
             {
-                _buckets = new Bucket[Capacity];
+                _capacity = 8;
+                _buckets = new Bucket[_capacity];
             }
 
             public NodeDictionary(NodeDictionary source)
             {
+                _capacity = source._capacity;
                 _buckets = source._buckets;
                 _size = source._size;
                 _source = source;
@@ -313,9 +315,9 @@ namespace Ledger.Core
             {
                 if (_source != null)
                 {
-                    _buckets = new Bucket[Capacity];
+                    _buckets = new Bucket[_capacity];
 
-                    for (var i = 0; i < Capacity; i++)
+                    for (var i = 0; i < _capacity; i++)
                     {
                         var sourceBucket = _source._buckets[i];
 
@@ -326,8 +328,11 @@ namespace Ledger.Core
                     _source = null;
                 }
 
+                if ((_size + 1) * 4 > _capacity * 3)
+                    Resize(_capacity * 2);
+
                 var hashCode = key.GetHashCode() & 0x7FFFFFFF;
-                var index = hashCode % Capacity;
+                var index = hashCode % _capacity;
 
                 var bucket = _buckets[index];
 
@@ -343,7 +348,7 @@ namespace Ledger.Core
             public bool TryGetValue(string key, out Node value)
             {
                 var hashCode = key.GetHashCode() & 0x7FFFFFFF;
-                var index = hashCode % Capacity;
+                var index = hashCode % _capacity;
 
                 var bucket = _buckets[index];
 
@@ -358,7 +363,7 @@ namespace Ledger.Core
 
             public IEnumerable<Node> GetValues()
             {
-                for (var i = 0; i < Capacity; i++)
+                for (var i = 0; i < _capacity; i++)
                 {
                     var bucket = _buckets[i];
 
@@ -370,13 +375,44 @@ namespace Ledger.Core
 
             public IEnumerable<KeyValuePair<string, Node>> GetPairs()
             {
-                for (var i = 0; i < Capacity; i++)
+                for (var i = 0; i < _capacity; i++)
                 {
                     var bucket = _buckets[i];
 
                     if (bucket != null)
                         foreach (var pair in bucket.GetPairs())
                             yield return pair;
+                }
+            }
+
+            private void Resize(int newCapacity)
+            {
+                var oldBuckets = _buckets;
+                var oldCapacity = _capacity;
+
+                _capacity = newCapacity;
+                _buckets = new Bucket[_capacity];
+
+                for (var i = 0; i < oldCapacity; i++)
+                {
+                    var oldBucket = oldBuckets[i];
+                    if (oldBucket == null)
+                        continue;
+
+                    foreach (var pair in oldBucket.GetPairs())
+                    {
+                        var hashCode = pair.Key.GetHashCode() & 0x7FFFFFFF;
+                        var index = hashCode % _capacity;
+                        var bucket = _buckets[index];
+
+                        if (bucket == null)
+                        {
+                            bucket = new Bucket();
+                            _buckets[index] = bucket;
+                        }
+
+                        bucket.Set(pair.Key, pair.Value);
+                    }
                 }
             }
 

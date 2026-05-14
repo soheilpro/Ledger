@@ -49,15 +49,16 @@ namespace Ledger.Core
                 throw new ValidationException($"Entry ({entry}) cannot occur on or before the last entry ({lastEntry}).");
 
             var balances = new List<IBalance>();
+            var balancesMap = new Dictionary<IBook, IBalance>();
 
             foreach (var entryItem in entry.Items)
             {
-                var balance = balances.SingleOrDefault(x => x.Book.Equals(entryItem.Book));
-
-                if (balance == null)
+                IBalance balance;
+                if (!balancesMap.TryGetValue(entryItem.Book, out balance))
                 {
                     balance = CreateBalance(entryItem.Book, entry.Index);
                     balances.Add(balance);
+                    balancesMap[entryItem.Book] = balance;
                 }
 
                 var balanceItem = new BalanceItem();

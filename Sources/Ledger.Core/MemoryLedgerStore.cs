@@ -57,7 +57,11 @@ namespace Ledger.Core
 
         public virtual ICollection<IEntry> GetEntries(ICollection<IComparable> indexes)
         {
-            return _entries.Where(entry => indexes.Any(index => entry.Index.CompareTo(index) == 0)).ToList();
+            if (indexes == null || indexes.Count == 0)
+                return new List<IEntry>();
+
+            var indexSet = new SortedSet<IComparable>(indexes, ComparableComparer.Instance);
+            return _entries.Where(entry => indexSet.Contains(entry.Index)).ToList();
         }
 
         public virtual ICollection<IEntry> GetEntries(IComparable startIndex, bool startInclusive, IComparable endIndex, bool endInclusive, bool reverse = false, int count = int.MaxValue)
@@ -108,7 +112,15 @@ namespace Ledger.Core
 
         public virtual ICollection<IBalance> GetBalances(IBook book, IEnumerable<IComparable> indexes)
         {
-            return GetBalances(book).Where(balance => indexes.Any(index => balance.Index.CompareTo(index) == 0)).ToList();
+            if (indexes == null)
+                return new List<IBalance>();
+
+            var indexSet = new SortedSet<IComparable>(indexes, ComparableComparer.Instance);
+
+            if (indexSet.Count == 0)
+                return new List<IBalance>();
+
+            return GetBalances(book).Where(balance => indexSet.Contains(balance.Index)).ToList();
         }
 
         public virtual ICollection<IBalance> GetBalances(IBook book, IComparable startIndex, bool startInclusive, IComparable endIndex, bool endInclusive, bool reverse = false, int count = int.MaxValue)
@@ -271,6 +283,25 @@ namespace Ledger.Core
                     right = middle - 1;
                 else
                     left = middle + 1;
+            }
+        }
+
+        private class ComparableComparer : IComparer<IComparable>
+        {
+            public static readonly ComparableComparer Instance = new ComparableComparer();
+
+            public int Compare(IComparable x, IComparable y)
+            {
+                if (ReferenceEquals(x, y))
+                    return 0;
+
+                if (x == null)
+                    return -1;
+
+                if (y == null)
+                    return 1;
+
+                return x.CompareTo(y);
             }
         }
     }

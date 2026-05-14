@@ -84,8 +84,7 @@ namespace Ledger.Core
         {
             // Performance.MarkStart("EntryHelper.Validate");
 
-            var matches = new List<Tuple<IAccount, IAccount, IAccountPredicate>>();
-            var matchedAccounts = new HashSet<IAccount>();
+            var matchesDict = new Dictionary<IAccount, Tuple<IAccount, IAccountPredicate>>();
 
             var entryItemAccountGroups = sourceEntry.Items.GroupBy(item => new {item.Account, item.Book}).ToList();
             foreach (var entryItemAccountGroup in entryItemAccountGroups)
@@ -103,25 +102,21 @@ namespace Ledger.Core
 
                     if (accountMapItem.Account == null)
                     {
-                        matchedAccounts.Add(account);
-                        matches.Add(Tuple.Create(account, accountMapItem.Account, accountMapItem.AccountPredicate));
+                        matchesDict[account] = Tuple.Create(accountMapItem.Account, accountMapItem.AccountPredicate);
                         continue;
                     }
 
-                    if (matchedAccounts.Contains(account))
-                    {
-                        var duplicateItem = matches.First(x => x.Item1.Equals(account));
-                        throw new ValidationException(string.Format("Duplicate selected account:{0}{1}{0}{2} -> {3}{0}{4} -> {5}", Environment.NewLine, account, duplicateItem.Item3, duplicateItem.Item2, accountMapItem.AccountPredicate, accountMapItem.Account));
-                    }
+                    Tuple<IAccount, IAccountPredicate> existing;
+                    if (matchesDict.TryGetValue(account, out existing))
+                        throw new ValidationException(string.Format("Duplicate selected account:{0}{1}{0}{2} -> {3}{0}{4} -> {5}", Environment.NewLine, account, existing.Item2, existing.Item1, accountMapItem.AccountPredicate, accountMapItem.Account));
 
-                    matchedAccounts.Add(account);
-                    matches.Add(Tuple.Create(account, accountMapItem.Account, accountMapItem.AccountPredicate));
+                    matchesDict[account] = Tuple.Create(accountMapItem.Account, accountMapItem.AccountPredicate);
                 }
             }
 
-            if (matches.Select(x => x.Item1).Distinct().Count() != entryItemAccountGroups.Count())
+            if (matchesDict.Count != entryItemAccountGroups.Count())
             {
-                var missedAccounts = sourceEntry.Items.Select(x => x.Account).Except(matches.Select(x => x.Item1)).ToList();
+                var missedAccounts = sourceEntry.Items.Select(x => x.Account).Except(matchesDict.Keys).ToList();
 
                 throw new ValidationException($"Missed accounts:{Environment.NewLine}{string.Join(Environment.NewLine, missedAccounts)}");
             }

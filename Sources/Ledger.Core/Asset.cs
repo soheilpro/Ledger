@@ -15,9 +15,6 @@ namespace Ledger.Core
         {
             get
             {
-                if (_idParts == null)
-                    _idParts = Id.Split(':');
-
                 return _idParts;
             }
         }

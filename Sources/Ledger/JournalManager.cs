@@ -6,7 +6,7 @@ namespace Ledger
 {
     internal class JournalManager : IJournalManager
     {
-        private string _journalPath;
+        private string[] _journalPaths;
         private IJournal _journal;
         private string[] _accountIds;
         private string[] _markNames;
@@ -44,9 +44,9 @@ namespace Ledger
             }
         }
 
-        public JournalManager(string journalPath)
+        public JournalManager(string[] journalPaths)
         {
-            _journalPath = journalPath;
+            _journalPaths = journalPaths;
         }
 
         public void ReloadJournal()
@@ -60,7 +60,7 @@ namespace Ledger
         {
             var journalReader = new JournalReader();
 
-            return journalReader.Open(_journalPath);
+            return journalReader.Open(_journalPaths);
         }
     }
 }

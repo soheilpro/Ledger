@@ -45,9 +45,10 @@ Assets:Bank EUR -22.88
 * A positive number means to debit the account, and a negative number means to credit the account.
 
 ## Usage
-Run the application and pass the path of your journal file as the first argument:
+Run the application and pass one or more journal file paths:
 ```
 $ ledger 2018.journal
+$ ledger 2018.journal 2019.journal
 ```
 
 Once inside the program, run any of the following commands or type `help` to view a list of all available commands.

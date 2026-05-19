@@ -63,7 +63,7 @@ namespace Ledger.Reports
             var accountPredicate = new QueryAccountPredicate(NoChildren ? AccountQuery : AccountQuery + ":**");
             var balance = ledger.GetBalanceAtOrBefore(book, Index);
             var accountIds = AllLevels ? GetAllAccountIds(balance, accountPredicate) : GetAccountIds(balance, accountPredicate);
-            var reportItems = new List<BalanceReport.ReportItem>();
+            var reportItems = new List<BalanceReportItem>();
 
             foreach (var accountId in accountIds)
             {
@@ -74,7 +74,7 @@ namespace Ledger.Reports
 
                 foreach (var balanceItem in balance.Items.GetBalanceItemsCombined(predicate))
                 {
-                    var reportItem = new BalanceReport.ReportItem();
+                    var reportItem = new BalanceReportItem();
                     reportItem.Account = new Account(accountId);
                     reportItem.Asset = balanceItem.Asset;
                     reportItem.TotalDebit = balanceItem.TotalDebit;

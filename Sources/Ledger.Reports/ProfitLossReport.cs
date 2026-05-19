@@ -5,65 +5,65 @@ namespace Ledger.Reports
 {
     public class ProfitLossReport : ReportBase
     {
-        public ProfitLossReport(ReportItem[] reportItems)
+        public ProfitLossReport(ProfitLossReportItem[] reportItems)
         {
-            ReportItems = reportItems;
+            Items = reportItems;
         }
 
-        public ReportItem[] ReportItems
+        public ProfitLossReportItem[] Items
         {
             get;
         }
+    }
 
-        public class ReportItem
+    public class ProfitLossReportItem
+    {
+        public IAccount Account
         {
-            public IAccount Account
-            {
-                get;
-                set;
-            }
+            get;
+            set;
+        }
 
-            public IAsset Asset
-            {
-                get;
-                set;
-            }
+        public IAsset Asset
+        {
+            get;
+            set;
+        }
 
-            public decimal TotalDebit
-            {
-                get;
-                set;
-            }
+        public decimal TotalDebit
+        {
+            get;
+            set;
+        }
 
-            public decimal TotalCredit
-            {
-                get;
-                set;
-            }
+        public decimal TotalCredit
+        {
+            get;
+            set;
+        }
 
-            public decimal BalanceDebit
-            {
-                get;
-                set;
-            }
+        public decimal BalanceDebit
+        {
+            get;
+            set;
+        }
 
-            public decimal BalanceCredit
-            {
-                get;
-                set;
-            }
+        public decimal BalanceCredit
+        {
+            get;
+            set;
+        }
 
-            public decimal BalanceDebitPercent
-            {
-                get;
-                set;
-            }
+        public decimal BalanceDebitPercent
+        {
+            get;
+            set;
+        }
 
-            public decimal BalanceCreditPercent
-            {
-                get;
-                set;
-            }
+        public decimal BalanceCreditPercent
+        {
+            get;
+            set;
         }
     }
 }

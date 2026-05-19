@@ -73,13 +73,13 @@ namespace Ledger.Commands
         private static void Print(BalanceCheckReport report)
         {
             var table = new Table();
-            table.Columns.Add(new TableAssetColumn<BalanceCheckReport.ReportItem>("Asset", row => row.Asset));
-            table.Columns.Add(new TableAmountColumn<BalanceCheckReport.ReportItem>("Assets", row => row.Assets));
-            table.Columns.Add(new TableAmountColumn<BalanceCheckReport.ReportItem>("Liabilities + Equity", row => row.LiabilitiesAndEquity));
-            table.Columns.Add(new TableAmountColumn<BalanceCheckReport.ReportItem>("Liabilities", row => row.Liabilities));
-            table.Columns.Add(new TableAmountColumn<BalanceCheckReport.ReportItem>("Equity", row => row.Equity));
-            table.Columns.Add(new TableAmountColumn<BalanceCheckReport.ReportItem>("Diff", row => row.Diff));
-            table.Rows = report.ReportItems;
+            table.Columns.Add(new TableAssetColumn<BalanceCheckReportItem>("Asset", row => row.Asset));
+            table.Columns.Add(new TableAmountColumn<BalanceCheckReportItem>("Assets", row => row.Assets));
+            table.Columns.Add(new TableAmountColumn<BalanceCheckReportItem>("Liabilities + Equity", row => row.LiabilitiesAndEquity));
+            table.Columns.Add(new TableAmountColumn<BalanceCheckReportItem>("Liabilities", row => row.Liabilities));
+            table.Columns.Add(new TableAmountColumn<BalanceCheckReportItem>("Equity", row => row.Equity));
+            table.Columns.Add(new TableAmountColumn<BalanceCheckReportItem>("Diff", row => row.Diff));
+            table.Rows = report.Items;
 
             table.PrintText(Console.Out);
         }

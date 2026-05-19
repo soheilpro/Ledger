@@ -56,13 +56,13 @@ namespace Ledger.Reports
             var book = new Book(Book);
             var accountPredicate = new QueryAccountPredicate(NoChildren ? AccountQuery : AccountQuery + ":**");
             var entryItems = ledger.GetEntriesAtOrBetween(StartIndex, EndIndex).GetEntryItems(book, accountPredicate);
-            var reportItems = new List<EntryItemsReport.ReportItem>();
+            var reportItems = new List<EntryItemsReportItem>();
 
             foreach (var entryItem in entryItems)
             {
                 var balanceItem = ledger.GetBalanceAt(book, entryItem.Entry.Index).Items.GetBalanceItem(entryItem.Account, entryItem.Asset);
 
-                var reportItem = new EntryItemsReport.ReportItem();
+                var reportItem = new EntryItemsReportItem();
                 reportItem.Index = entryItem.Entry.Index;
                 reportItem.Account = entryItem.Account;
                 reportItem.Asset = entryItem.Asset;

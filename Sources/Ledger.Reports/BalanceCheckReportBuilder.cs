@@ -38,11 +38,11 @@ namespace Ledger.Reports
             var book = new Book(Book);
             var balance = ledger.GetBalanceAtOrBefore(book, Index);
             var balanceItems = balance.Items.GetBalanceItemsCombined(new TrueAccountPredicate());
-            var reportItems = new List<BalanceCheckReport.ReportItem>();
+            var reportItems = new List<BalanceCheckReportItem>();
 
             foreach (var balanceItem in balanceItems)
             {
-                var reportItem = new BalanceCheckReport.ReportItem();
+                var reportItem = new BalanceCheckReportItem();
                 reportItem.Asset = balanceItem.Asset;
                 reportItem.Assets = balance.Items.GetBalanceItemCombined(new QueryAccountPredicate("Assets:**"), balanceItem.Asset).BalanceDebitOrDefault();
                 reportItem.Liabilities = balance.Items.GetBalanceItemCombined(new QueryAccountPredicate("Liabilities:**"), balanceItem.Asset).BalanceDebitOrDefault();

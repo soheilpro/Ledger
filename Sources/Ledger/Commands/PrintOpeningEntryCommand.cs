@@ -53,7 +53,16 @@ namespace Ledger.Commands
 
             var report = reportBuilder.GetReport();
 
-            report.Print(Console.Out);
+            Print(report);
+        }
+
+        private static void Print(OpeningEntryReport report)
+        {
+            Console.Out.WriteLine("@entry ");
+            Console.Out.WriteLine("@opening");
+
+            foreach (var entryItem in report.EntryItems)
+                Console.Out.WriteLine($"{entryItem.Account} {entryItem.Asset} {entryItem.Debit - entryItem.Credit}");
         }
     }
 

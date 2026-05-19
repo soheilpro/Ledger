@@ -2,7 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 
-namespace Ledger.Reports
+namespace Ledger.Commands
 {
     public class Table : ITable
     {
@@ -24,12 +24,10 @@ namespace Ledger.Reports
 
             var values = new string[Rows.Count + 1, Columns.Count];
 
-            // Get values
             for (var columnIndex = 0; columnIndex < Columns.Count; columnIndex++)
                 for (var rowIndex = 0; rowIndex < Rows.Count; rowIndex++)
                     values[rowIndex, columnIndex] = Columns[columnIndex].GetStringValue(Rows[rowIndex]);
 
-            // Calculate max column widths
             var maxColumnWidths = new int[Columns.Count];
 
             for (var columnIndex = 0; columnIndex < Columns.Count; columnIndex++)
@@ -40,7 +38,6 @@ namespace Ledger.Reports
                     maxColumnWidths[columnIndex] = Math.Max(maxColumnWidths[columnIndex], values[rowIndex, columnIndex].Length);
             }
 
-            // Header title
             for (var columnIndex = 0; columnIndex < Columns.Count; columnIndex++)
             {
                 var column = Columns[columnIndex];
@@ -53,11 +50,8 @@ namespace Ledger.Reports
 
             writer.WriteLine();
 
-            // Header line
             for (var columnIndex = 0; columnIndex < Columns.Count; columnIndex++)
             {
-                var column = Columns[columnIndex];
-
                 writer.Write(new String(RowSeparator, maxColumnWidths[columnIndex]));
 
                 if (columnIndex != Columns.Count - 1)
@@ -66,7 +60,6 @@ namespace Ledger.Reports
 
             writer.WriteLine();
 
-            // Rows
             for (var rowIndex = 0; rowIndex < Rows.Count; rowIndex++)
             {
                 for (var columnIndex = 0; columnIndex < Columns.Count; columnIndex++)

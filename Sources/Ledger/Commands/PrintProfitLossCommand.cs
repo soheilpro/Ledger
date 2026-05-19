@@ -73,7 +73,21 @@ namespace Ledger.Commands
 
             var report = reportBuilder.GetReport();
 
-            report.Print(Console.Out);
+            Print(report);
+        }
+
+        private static void Print(ProfitLossReport report)
+        {
+            var table = new Table();
+            table.Columns.Add(new TableAccountColumn<ProfitLossReport.ReportItem>("Account", row => row.Account));
+            table.Columns.Add(new TableAssetColumn<ProfitLossReport.ReportItem>("Asset", row => row.Asset));
+            table.Columns.Add(new TableAmountColumn<ProfitLossReport.ReportItem>("Balance Debit", row => row.BalanceDebit));
+            table.Columns.Add(new TableAmountColumn<ProfitLossReport.ReportItem>("%", row => row.BalanceDebitPercent));
+            table.Columns.Add(new TableAmountColumn<ProfitLossReport.ReportItem>("Balance Credit", row => row.BalanceCredit));
+            table.Columns.Add(new TableAmountColumn<ProfitLossReport.ReportItem>("%", row => row.BalanceCreditPercent));
+            table.Rows = report.ReportItems;
+
+            table.PrintText(Console.Out);
         }
     }
 

@@ -74,7 +74,22 @@ namespace Ledger.Commands
 
             var report = reportBuilder.GetReport();
 
-            report.Print(Console.Out);
+            Print(report);
+        }
+
+        private static void Print(EntryItemsReport report)
+        {
+            var table = new Table();
+            table.Columns.Add(new TableTextColumn<EntryItemsReport.ReportItem>("Index", row => row.Index));
+            table.Columns.Add(new TableAccountColumn<EntryItemsReport.ReportItem>("Account", row => row.Account));
+            table.Columns.Add(new TableAssetColumn<EntryItemsReport.ReportItem>("Asset", row => row.Asset));
+            table.Columns.Add(new TableAmountColumn<EntryItemsReport.ReportItem>("Debit", row => row.Debit));
+            table.Columns.Add(new TableAmountColumn<EntryItemsReport.ReportItem>("Credit", row => row.Credit));
+            table.Columns.Add(new TableAmountColumn<EntryItemsReport.ReportItem>("Balance Debit", row => row.BalanceDebit));
+            table.Columns.Add(new TableAmountColumn<EntryItemsReport.ReportItem>("Balance Credit", row => row.BalanceCredit));
+            table.Rows = report.ReportItems;
+
+            table.PrintText(Console.Out);
         }
     }
 

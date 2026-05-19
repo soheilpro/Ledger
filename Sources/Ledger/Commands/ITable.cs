@@ -2,7 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 
-namespace Ledger.Reports
+namespace Ledger.Commands
 {
     public interface ITable
     {

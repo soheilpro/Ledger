@@ -87,7 +87,17 @@ namespace Ledger.Commands
 
             var report = reportBuilder.GetReport();
 
-            report.Print(Console.Out);
+            Print(report);
+        }
+
+        private static void Print(NetWorthReport report)
+        {
+            var table = new Table();
+            table.Columns.Add(new TableAssetColumn<NetWorthReport.ReportItem>("Asset", row => row.Asset));
+            table.Columns.Add(new TableAmountColumn<NetWorthReport.ReportItem>("Value", row => row.Value));
+            table.Rows = new[] { report.Item };
+
+            table.PrintText(Console.Out);
         }
     }
 

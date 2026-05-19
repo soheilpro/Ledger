@@ -67,7 +67,21 @@ namespace Ledger.Commands
 
             var report = reportBuilder.GetReport();
 
-            report.Print(Console.Out);
+            Print(report);
+        }
+
+        private static void Print(BalanceCheckReport report)
+        {
+            var table = new Table();
+            table.Columns.Add(new TableAssetColumn<BalanceCheckReport.ReportItem>("Asset", row => row.Asset));
+            table.Columns.Add(new TableAmountColumn<BalanceCheckReport.ReportItem>("Assets", row => row.Assets));
+            table.Columns.Add(new TableAmountColumn<BalanceCheckReport.ReportItem>("Liabilities + Equity", row => row.LiabilitiesAndEquity));
+            table.Columns.Add(new TableAmountColumn<BalanceCheckReport.ReportItem>("Liabilities", row => row.Liabilities));
+            table.Columns.Add(new TableAmountColumn<BalanceCheckReport.ReportItem>("Equity", row => row.Equity));
+            table.Columns.Add(new TableAmountColumn<BalanceCheckReport.ReportItem>("Diff", row => row.Diff));
+            table.Rows = report.ReportItems;
+
+            table.PrintText(Console.Out);
         }
     }
 

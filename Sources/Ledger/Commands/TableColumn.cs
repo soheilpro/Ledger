@@ -1,6 +1,6 @@
 using System;
 
-namespace Ledger.Reports
+namespace Ledger.Commands
 {
     public abstract class TableColumn : ITableColumn
     {

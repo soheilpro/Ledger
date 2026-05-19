@@ -1,37 +1,18 @@
 using System;
-using System.IO;
 using Ledger.Core;
 
 namespace Ledger.Reports
 {
     public class ProfitLossReport : ReportBase
     {
-        private ReportItem[] _reportItems;
-
         public ProfitLossReport(ReportItem[] reportItems)
         {
-            _reportItems = reportItems;
+            ReportItems = reportItems;
         }
 
-        public override void Print(TextWriter writer)
+        public ReportItem[] ReportItems
         {
-            var table = GetTable(_reportItems);
-
-            table.PrintText(writer);
-        }
-
-        private ITable GetTable(ReportItem[] reportItems)
-        {
-            var table = new Table();
-            table.Columns.Add(new TableAccountColumn<ReportItem>("Account", row => row.Account));
-            table.Columns.Add(new TableAssetColumn<ReportItem>("Asset", row => row.Asset));
-            table.Columns.Add(new TableAmountColumn<ReportItem>("Balance Debit", row => row.BalanceDebit));
-            table.Columns.Add(new TableAmountColumn<ReportItem>("%", row => row.BalanceDebitPercent));
-            table.Columns.Add(new TableAmountColumn<ReportItem>("Balance Credit", row => row.BalanceCredit));
-            table.Columns.Add(new TableAmountColumn<ReportItem>("%", row => row.BalanceCreditPercent));
-            table.Rows = reportItems;
-
-            return table;
+            get;
         }
 
         public class ReportItem

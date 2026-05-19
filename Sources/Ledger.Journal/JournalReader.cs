@@ -42,6 +42,12 @@ namespace Ledger.Journal
                         {
                             var entry = ReadEntry(directive, lines);
 
+                            if (entry.Type == EntryType.Opening && journal.Entries.Any(e => e.Type == EntryType.Opening))
+                                throw new JournalException($"Multiple opening entries are not allowed.");
+
+                            if (entry.Type == EntryType.Opening && journal.Entries.Any())
+                                throw new JournalException($"Opening entry should be the first entry in the journal.");
+
                             if (journal.Entries.Any(existingEntry => existingEntry.Index.Equals(entry.Index)))
                                 throw new JournalException($"Duplicate entry: {entry.Index}");
 
@@ -124,6 +130,7 @@ namespace Ledger.Journal
             var entryItemRegex = new Regex(@"^\s*((?<book>.*?)\s+)?(?<account>.*?)\s+(?<asset>.*?)\s+(?<amount>-?[\d,.]+)\s*$");
             var entry = new Entry();
             entry.Index = directive.Data;
+            entry.Type = EntryType.Normal;
 
             while (true)
             {
@@ -139,6 +146,13 @@ namespace Ledger.Journal
                 {
                     switch (directive.Name)
                     {
+                        case "@opening":
+                            if (entry.Type == EntryType.Opening)
+                                throw new JournalException($"Multiple @opening directives are not allowed.");
+
+                            entry.Type = EntryType.Opening;
+                            break;
+
                         case "@note":
                             // TODO
                             break;

@@ -44,7 +44,7 @@ namespace Ledger.Commands
             return null;
         }
 
-        protected string[] GetOptionSuggesions(string arg, int index, IContext context, string[] options)
+        protected string[] GetOptionSuggestions(string arg, int index, IContext context, string[] options)
         {
             var name = arg.Substring(2);
 
@@ -58,7 +58,7 @@ namespace Ledger.Commands
             return context.JournalManager.AccountIds.Where(accountId => accountId.StartsWith(arg, StringComparison.OrdinalIgnoreCase)).Select(account => string.Join(':', account.Split(':').Take(accountPartsLength))).Distinct().ToArray();
         }
 
-        protected string[] GetMarkSuggesions(string arg, int index, IContext context)
+        protected string[] GetMarkSuggestions(string arg, int index, IContext context)
         {
             var name = arg.Substring(1);
 

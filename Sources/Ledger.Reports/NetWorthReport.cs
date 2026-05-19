@@ -5,29 +5,29 @@ namespace Ledger.Reports
 {
     public class NetWorthReport : ReportBase
     {
-        public NetWorthReport(ReportItem reportItem)
+        public NetWorthReport(NetWorthReportItem reportItem)
         {
             Item = reportItem;
         }
 
-        public ReportItem Item
+        public NetWorthReportItem Item
         {
             get;
         }
+    }
 
-        public class ReportItem
+    public class NetWorthReportItem
+    {
+        public IAsset Asset
         {
-            public IAsset Asset
-            {
-                get;
-                set;
-            }
+            get;
+            set;
+        }
 
-            public decimal Value
-            {
-                get;
-                set;
-            }
+        public decimal Value
+        {
+            get;
+            set;
         }
     }
 }

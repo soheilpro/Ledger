@@ -80,13 +80,13 @@ namespace Ledger.Commands
         private static void Print(BalanceReport report)
         {
             var table = new Table();
-            table.Columns.Add(new TableAccountColumn<BalanceReport.ReportItem>("Account", row => row.Account));
-            table.Columns.Add(new TableAssetColumn<BalanceReport.ReportItem>("Asset", row => row.Asset));
-            table.Columns.Add(new TableAmountColumn<BalanceReport.ReportItem>("Total Debit", row => row.TotalDebit));
-            table.Columns.Add(new TableAmountColumn<BalanceReport.ReportItem>("Total Credit", row => row.TotalCredit));
-            table.Columns.Add(new TableAmountColumn<BalanceReport.ReportItem>("Balance Debit", row => row.BalanceDebit));
-            table.Columns.Add(new TableAmountColumn<BalanceReport.ReportItem>("Balance Credit", row => row.BalanceCredit));
-            table.Rows = report.ReportItems;
+            table.Columns.Add(new TableAccountColumn<BalanceReportItem>("Account", row => row.Account));
+            table.Columns.Add(new TableAssetColumn<BalanceReportItem>("Asset", row => row.Asset));
+            table.Columns.Add(new TableAmountColumn<BalanceReportItem>("Total Debit", row => row.TotalDebit));
+            table.Columns.Add(new TableAmountColumn<BalanceReportItem>("Total Credit", row => row.TotalCredit));
+            table.Columns.Add(new TableAmountColumn<BalanceReportItem>("Balance Debit", row => row.BalanceDebit));
+            table.Columns.Add(new TableAmountColumn<BalanceReportItem>("Balance Credit", row => row.BalanceCredit));
+            table.Rows = report.Items;
 
             table.PrintText(Console.Out);
         }

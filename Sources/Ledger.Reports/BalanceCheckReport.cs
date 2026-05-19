@@ -5,53 +5,53 @@ namespace Ledger.Reports
 {
     public class BalanceCheckReport : ReportBase
     {
-        public BalanceCheckReport(ReportItem[] reportItems)
+        public BalanceCheckReport(BalanceCheckReportItem[] reportItems)
         {
-            ReportItems = reportItems;
+            Items = reportItems;
         }
 
-        public ReportItem[] ReportItems
+        public BalanceCheckReportItem[] Items
         {
             get;
         }
+    }
 
-        public class ReportItem
+    public class BalanceCheckReportItem
+    {
+        public IAsset Asset
         {
-            public IAsset Asset
-            {
-                get;
-                set;
-            }
+            get;
+            set;
+        }
 
-            public decimal Assets
-            {
-                get;
-                set;
-            }
+        public decimal Assets
+        {
+            get;
+            set;
+        }
 
-            public decimal LiabilitiesAndEquity
-            {
-                get;
-                set;
-            }
+        public decimal LiabilitiesAndEquity
+        {
+            get;
+            set;
+        }
 
-            public decimal Liabilities
-            {
-                get;
-                set;
-            }
+        public decimal Liabilities
+        {
+            get;
+            set;
+        }
 
-            public decimal Equity
-            {
-                get;
-                set;
-            }
+        public decimal Equity
+        {
+            get;
+            set;
+        }
 
-            public decimal Diff
-            {
-                get;
-                set;
-            }
+        public decimal Diff
+        {
+            get;
+            set;
         }
     }
 }

@@ -51,13 +51,13 @@ namespace Ledger.Reports
             var startBalance = ledger.GetBalanceAt(book, StartIndex) ?? new Balance();
             var endBalance = ledger.GetBalanceAt(book, EndIndex) ?? new Balance();
             var accountIds = GetChildAccountIds(endBalance, AccountQuery);
-            var reportItems = new List<ProfitLossReport.ReportItem>();
+            var reportItems = new List<ProfitLossReportItem>();
 
             foreach (var accountId in accountIds)
             {
                 foreach (var balanceItem in endBalance.Items.GetBalanceItemsCombined(new QueryAccountPredicate(accountId + ":**")))
                 {
-                    var reportItem = new ProfitLossReport.ReportItem();
+                    var reportItem = new ProfitLossReportItem();
                     reportItem.Account = new Account(accountId);
                     reportItem.Asset = balanceItem.Asset;
                     reportItem.TotalDebit = balanceItem.TotalDebit;

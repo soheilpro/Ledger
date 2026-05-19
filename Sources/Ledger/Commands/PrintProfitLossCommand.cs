@@ -79,13 +79,13 @@ namespace Ledger.Commands
         private static void Print(ProfitLossReport report)
         {
             var table = new Table();
-            table.Columns.Add(new TableAccountColumn<ProfitLossReport.ReportItem>("Account", row => row.Account));
-            table.Columns.Add(new TableAssetColumn<ProfitLossReport.ReportItem>("Asset", row => row.Asset));
-            table.Columns.Add(new TableAmountColumn<ProfitLossReport.ReportItem>("Balance Debit", row => row.BalanceDebit));
-            table.Columns.Add(new TableAmountColumn<ProfitLossReport.ReportItem>("%", row => row.BalanceDebitPercent));
-            table.Columns.Add(new TableAmountColumn<ProfitLossReport.ReportItem>("Balance Credit", row => row.BalanceCredit));
-            table.Columns.Add(new TableAmountColumn<ProfitLossReport.ReportItem>("%", row => row.BalanceCreditPercent));
-            table.Rows = report.ReportItems;
+            table.Columns.Add(new TableAccountColumn<ProfitLossReportItem>("Account", row => row.Account));
+            table.Columns.Add(new TableAssetColumn<ProfitLossReportItem>("Asset", row => row.Asset));
+            table.Columns.Add(new TableAmountColumn<ProfitLossReportItem>("Balance Debit", row => row.BalanceDebit));
+            table.Columns.Add(new TableAmountColumn<ProfitLossReportItem>("%", row => row.BalanceDebitPercent));
+            table.Columns.Add(new TableAmountColumn<ProfitLossReportItem>("Balance Credit", row => row.BalanceCredit));
+            table.Columns.Add(new TableAmountColumn<ProfitLossReportItem>("%", row => row.BalanceCreditPercent));
+            table.Rows = report.Items;
 
             table.PrintText(Console.Out);
         }

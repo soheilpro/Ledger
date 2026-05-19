@@ -1,4 +1,6 @@
-﻿using System;
+using System;
+using System.Collections.Generic;
+using System.Linq;
 using CommandLine;
 
 namespace Ledger
@@ -11,12 +13,12 @@ namespace Ledger
 
             parser.ParseArguments<Options>(args)
                 .WithParsed<Options>(Run)
-                .WithNotParsed((errors) => Console.WriteLine($"Usage: ledger <journal> [--rates <path>]"));
+                .WithNotParsed((errors) => Console.WriteLine($"Usage: ledger <journal> [<journal> ...] [--rates <path>]"));
         }
 
         private static void Run(Options options)
         {
-            var journalManager = new JournalManager(options.JournalPath);
+            var journalManager = new JournalManager(options.JournalPaths.ToArray());
 
             var context = new Context();
             context.JournalManager = journalManager;
@@ -29,8 +31,8 @@ namespace Ledger
 
         private class Options
         {
-            [Value(0, MetaName = "JournalPath", Required = true, HelpText = "Path to the journal file.")]
-            public string JournalPath
+            [Value(0, MetaName = "JournalPaths", Required = true, HelpText = "Path to one or more journal files.")]
+            public IEnumerable<string> JournalPaths
             {
                 get;
                 set;

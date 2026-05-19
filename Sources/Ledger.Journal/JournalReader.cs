@@ -10,9 +10,18 @@ namespace Ledger.Journal
 {
     public class JournalReader
     {
-        public IJournal Open(string file)
+        public IJournal Open(string[] files)
         {
             var journal = new Journal();
+
+            foreach (var file in files)
+                Open(journal, file, file == files[0]);
+
+            return journal;
+        }
+
+        private void Open(Journal journal, string file, bool includeOpeningEntries)
+        {
             var lastEntry = default(IEntry);
             var lastMarks = new List<IMark>();
 
@@ -41,6 +50,9 @@ namespace Ledger.Journal
                         case "@entry":
                         {
                             var entry = ReadEntry(directive, lines);
+
+                            if (!includeOpeningEntries && entry.Type == EntryType.Opening)
+                                break;
 
                             if (entry.Type == EntryType.Opening && journal.Entries.Any(e => e.Type == EntryType.Opening))
                                 throw new JournalException($"Multiple opening entries are not allowed.");
@@ -85,8 +97,6 @@ namespace Ledger.Journal
                     }
                 }
             }
-
-            return journal;
         }
 
         private Directive ReadDirective(string line)

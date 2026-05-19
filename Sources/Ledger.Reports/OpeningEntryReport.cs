@@ -16,7 +16,7 @@ namespace Ledger.Reports
         public override void Print(TextWriter writer)
         {
             writer.WriteLine("@entry ");
-            writer.WriteLine("@note Opening Entry");
+            writer.WriteLine("@opening");
 
             foreach (var entryItem in _entryItems)
                 writer.WriteLine($"{entryItem.Account} {entryItem.Asset} {entryItem.Debit - entryItem.Credit}");

@@ -31,6 +31,12 @@ namespace Ledger.Core
             set;
         }
 
+        public EntryType Type
+        {
+            get;
+            set;
+        }
+
         public IEntryItemCollection Items
         {
         	get;

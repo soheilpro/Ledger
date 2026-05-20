@@ -2,7 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 
-namespace Ledger.Commands
+namespace Ledger.Repl.Commands
 {
     public interface ITable
     {

@@ -1,6 +1,6 @@
 using System;
 
-namespace Ledger.Commands
+namespace Ledger.Repl.Commands
 {
     public interface ITableColumn
     {

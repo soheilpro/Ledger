@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 
-namespace Ledger
+namespace Ledger.Repl
 {
     internal class ArgumentParser
     {

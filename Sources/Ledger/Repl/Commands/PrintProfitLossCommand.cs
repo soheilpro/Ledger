@@ -3,7 +3,7 @@ using System.Linq;
 using CommandLine;
 using Ledger.Reports;
 
-namespace Ledger.Commands
+namespace Ledger.Repl.Commands
 {
     internal class PrintProfitLossCommand : CommandBase<PrintProfitLossOptions>
     {
@@ -41,7 +41,7 @@ namespace Ledger.Commands
             }
         }
 
-        public PrintProfitLossCommand(IController controller) : base(controller)
+        public PrintProfitLossCommand(IReplController controller) : base(controller)
         {
         }
 

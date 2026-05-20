@@ -1,16 +1,17 @@
 using System;
+using System.Linq;
 using CommandLine;
 using Ledger.Reports;
 
-namespace Ledger.Commands
+namespace Ledger.Repl.Commands
 {
-    internal class PrintBalancesCommand : CommandBase<PrintBalancesOptions>
+    internal class PrintEntryItemsCommand : CommandBase<PrintEntryItemsOptions>
     {
         public override string Name
         {
             get
             {
-                return "balances";
+                return "entry-items";
             }
         }
 
@@ -19,7 +20,7 @@ namespace Ledger.Commands
             get
             {
                 return new[] {
-                    "b",
+                    "e",
                 };
             }
         }
@@ -28,7 +29,7 @@ namespace Ledger.Commands
         {
             get
             {
-                return "[account] [--at index] [--all-levels] [--no-children] [--zero]";
+                return "[account] [--start index] [--end index] [--asset asset] [--no-children]";
             }
         }
 
@@ -36,18 +37,18 @@ namespace Ledger.Commands
         {
             get
             {
-                return "Print balances.";
+                return "Print entry items.";
             }
         }
 
-        public PrintBalancesCommand(IController controller) : base(controller)
+        public PrintEntryItemsCommand(IReplController controller) : base(controller)
         {
         }
 
         public override string[] GetSuggestions(string arg, int index, IContext context)
         {
             if (arg.StartsWith("--"))
-                return GetOptionSuggestions(arg, index, context, new string[] { "at", "asset", "all-levels", "no-children", "zero" });
+                return GetOptionSuggestions(arg, index, context, new string[] { "start", "end", "asset", "no-children" });
 
             if (arg.StartsWith("@"))
                 return GetMarkSuggestions(arg, index, context);
@@ -58,41 +59,41 @@ namespace Ledger.Commands
             return base.GetSuggestions(arg, index, context);
         }
 
-        protected override void Execute(PrintBalancesOptions options, IContext context)
+        protected override void Execute(PrintEntryItemsOptions options, IContext context)
         {
             context.JournalManager.ReloadJournal();
 
-            var reportBuilder = new BalanceReportBuilder();
+            var reportBuilder = new EntryItemsReportBuilder();
             reportBuilder.Journal = context.JournalManager.Journal;
             reportBuilder.Book = "default";
             reportBuilder.AccountQuery = options.AccountQuery;
-            reportBuilder.Index = ResolveIndex(options.Index, context, false);
+            reportBuilder.StartIndex = ResolveIndex(options.StartIndex, context, true);
+            reportBuilder.EndIndex = ResolveIndex(options.EndIndex, context, false) ?? context.JournalManager.Journal.Entries.LastOrDefault().Index.ToString();
             reportBuilder.AssetQuery = options.AssetQuery;
-            reportBuilder.AllLevels = options.AllLevels;
             reportBuilder.NoChildren = options.NoChildren;
-            reportBuilder.IncludeZeroBalances = options.IncludeZeroBalances;
 
             var report = reportBuilder.GetReport();
 
             Print(report);
         }
 
-        private static void Print(BalanceReport report)
+        private static void Print(EntryItemsReport report)
         {
             var table = new Table();
-            table.Columns.Add(new TableAccountColumn<BalanceReportItem>("Account", row => row.Account));
-            table.Columns.Add(new TableAssetColumn<BalanceReportItem>("Asset", row => row.Asset));
-            table.Columns.Add(new TableAmountColumn<BalanceReportItem>("Total Debit", row => row.TotalDebit));
-            table.Columns.Add(new TableAmountColumn<BalanceReportItem>("Total Credit", row => row.TotalCredit));
-            table.Columns.Add(new TableAmountColumn<BalanceReportItem>("Balance Debit", row => row.BalanceDebit));
-            table.Columns.Add(new TableAmountColumn<BalanceReportItem>("Balance Credit", row => row.BalanceCredit));
+            table.Columns.Add(new TableTextColumn<EntryItemsReportItem>("Index", row => row.Index));
+            table.Columns.Add(new TableAccountColumn<EntryItemsReportItem>("Account", row => row.Account));
+            table.Columns.Add(new TableAssetColumn<EntryItemsReportItem>("Asset", row => row.Asset));
+            table.Columns.Add(new TableAmountColumn<EntryItemsReportItem>("Debit", row => row.Debit));
+            table.Columns.Add(new TableAmountColumn<EntryItemsReportItem>("Credit", row => row.Credit));
+            table.Columns.Add(new TableAmountColumn<EntryItemsReportItem>("Balance Debit", row => row.BalanceDebit));
+            table.Columns.Add(new TableAmountColumn<EntryItemsReportItem>("Balance Credit", row => row.BalanceCredit));
             table.Rows = report.Items;
 
             table.PrintText(Console.Out);
         }
     }
 
-    internal class PrintBalancesOptions
+    internal class PrintEntryItemsOptions
     {
         [Value(0, Default = "**")]
         public string AccountQuery
@@ -101,8 +102,15 @@ namespace Ledger.Commands
             set;
         }
 
-        [Option("at")]
-        public string Index
+        [Option("start")]
+        public string StartIndex
+        {
+            get;
+            set;
+        }
+
+        [Option("end")]
+        public string EndIndex
         {
             get;
             set;
@@ -115,22 +123,8 @@ namespace Ledger.Commands
             set;
         }
 
-        [Option("all-levels")]
-        public bool AllLevels
-        {
-            get;
-            set;
-        }
-
         [Option("no-children")]
         public bool NoChildren
-        {
-            get;
-            set;
-        }
-
-        [Option("zero")]
-        public bool IncludeZeroBalances
         {
             get;
             set;

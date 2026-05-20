@@ -1,7 +1,7 @@
 using System;
 using Ledger.Core;
 
-namespace Ledger.Commands
+namespace Ledger.Repl.Commands
 {
     public class TableAssetColumn<TRow> : TableColumn where TRow : class
     {

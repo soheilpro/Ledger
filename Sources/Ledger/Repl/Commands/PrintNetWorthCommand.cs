@@ -5,7 +5,7 @@ using Ledger.Core;
 using Ledger.Journal;
 using Ledger.Reports;
 
-namespace Ledger.Commands
+namespace Ledger.Repl.Commands
 {
     internal class PrintNetWorthCommand : CommandBase<PrintNetWorthOptions>
     {
@@ -43,7 +43,7 @@ namespace Ledger.Commands
             }
         }
 
-        public PrintNetWorthCommand(IController controller) : base(controller)
+        public PrintNetWorthCommand(IReplController controller) : base(controller)
         {
         }
 

@@ -2,7 +2,7 @@ using System;
 using CommandLine;
 using Ledger.Reports;
 
-namespace Ledger.Commands
+namespace Ledger.Repl.Commands
 {
     internal class PrintOpeningEntryCommand : CommandBase<PrintOpeningEntryOptions>
     {
@@ -30,7 +30,7 @@ namespace Ledger.Commands
             }
         }
 
-        public PrintOpeningEntryCommand(IController controller) : base(controller)
+        public PrintOpeningEntryCommand(IReplController controller) : base(controller)
         {
         }
 

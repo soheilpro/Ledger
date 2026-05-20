@@ -4,6 +4,7 @@ using System.Linq;
 using CommandLine;
 using Ledger.Rates;
 using Ledger.Repl;
+using Ledger.Tui;
 
 namespace Ledger
 {
@@ -15,7 +16,7 @@ namespace Ledger
 
             parser.ParseArguments<Options>(args)
                 .WithParsed(Run)
-                .WithNotParsed((errors) => Console.WriteLine($"Usage: ledger <journal> [<journal> ...] [--rates <path>]"));
+                .WithNotParsed((errors) => Console.WriteLine($"Usage: ledger <journal> [<journal> ...] [--rates <path>] [--tui]"));
         }
 
         private static void Run(Options options)
@@ -23,13 +24,19 @@ namespace Ledger
             var journalManager = new JournalManager(options.JournalPaths.ToArray());
             var ratesManager = new RatesManager(options.RatesPath);
 
-            var context = new Context()
+            var context = new Repl.Context()
             {
                 JournalManager = journalManager,
                 RatesManager = ratesManager
             };
 
-            var controller = new ReplController(context);
+            var context2 = new Tui.Context()
+            {
+                JournalManager = journalManager,
+                RatesPath = options.RatesPath
+            };
+
+            IController controller = options.UseTui ? new TuiController(context2) : new ReplController(context);
 
             controller.Run();
         }
@@ -45,6 +52,13 @@ namespace Ledger
 
             [Option("rates", HelpText = "Path to rates file.")]
             public string RatesPath
+            {
+                get;
+                set;
+            }
+
+            [Option("tui", HelpText = "Launch the terminal UI instead of the REPL.")]
+            public bool UseTui
             {
                 get;
                 set;

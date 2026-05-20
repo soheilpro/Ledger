@@ -2,7 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 
-namespace Ledger.Repl.Commands
+namespace Ledger.Repl.Drawing
 {
     public class Table : ITable
     {

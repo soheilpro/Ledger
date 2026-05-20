@@ -3,6 +3,7 @@ using System.Linq;
 using CommandLine;
 using Ledger.Core;
 using Ledger.Journal;
+using Ledger.Repl.Drawing;
 using Ledger.Reports;
 
 namespace Ledger.Repl.Commands

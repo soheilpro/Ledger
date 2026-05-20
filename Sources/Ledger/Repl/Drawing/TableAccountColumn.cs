@@ -1,7 +1,7 @@
 using System;
 using Ledger.Core;
 
-namespace Ledger.Repl.Commands
+namespace Ledger.Repl.Drawing
 {
     public class TableAccountColumn<TRow> : TableColumn where TRow : class
     {

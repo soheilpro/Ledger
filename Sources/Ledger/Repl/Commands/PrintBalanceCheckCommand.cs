@@ -1,5 +1,6 @@
 using System;
 using CommandLine;
+using Ledger.Repl.Drawing;
 using Ledger.Reports;
 
 namespace Ledger.Repl.Commands

@@ -67,17 +67,17 @@ namespace Ledger.Repl.Commands
 
         public void Execute(string[] args, IContext context)
         {
-            var parser = new CommandLine.Parser(configuration => configuration.HelpWriter = null);
+            var parser = new Parser(configuration => configuration.HelpWriter = null);
 
             parser.ParseArguments<TOptions>(args)
-                .WithParsed<TOptions>(options => Execute(options, context))
+                .WithParsed(options => Execute(options, context))
                 .WithNotParsed(errors =>
                 {
                     var error = errors.First();
 
-                    if (error is CommandLine.MissingRequiredOptionError)
+                    if (error is MissingRequiredOptionError)
                         ConsoleHelper.PrintError($"Missing required argument.");
-                    else if (error is CommandLine.UnknownOptionError e)
+                    else if (error is UnknownOptionError e)
                         ConsoleHelper.PrintError($"Unknown argument: {e.Token}");
                     else
                         ConsoleHelper.PrintError(error.ToString());

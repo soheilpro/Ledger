@@ -2,11 +2,11 @@ using System;
 using System.Linq;
 using CommandLine;
 
-namespace Ledger.Commands
+namespace Ledger.Repl.Commands
 {
     internal abstract class CommandBase<TOptions> : ICommand
     {
-        public IController Controller
+        public IReplController Controller
         {
             get;
         }
@@ -34,7 +34,7 @@ namespace Ledger.Commands
             get;
         }
 
-        public CommandBase(IController controller)
+        public CommandBase(IReplController controller)
         {
             Controller = controller;
         }

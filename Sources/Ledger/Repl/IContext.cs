@@ -1,6 +1,6 @@
 using System;
 
-namespace Ledger
+namespace Ledger.Repl
 {
     internal interface IContext
     {

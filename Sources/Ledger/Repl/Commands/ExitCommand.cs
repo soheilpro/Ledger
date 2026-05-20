@@ -1,6 +1,6 @@
 using System;
 
-namespace Ledger.Commands
+namespace Ledger.Repl.Commands
 {
     internal class ExitCommand : CommandBase<ExitOptions>
     {
@@ -20,7 +20,7 @@ namespace Ledger.Commands
             }
         }
 
-        public ExitCommand(IController controller) : base(controller)
+        public ExitCommand(IReplController controller) : base(controller)
         {
         }
 

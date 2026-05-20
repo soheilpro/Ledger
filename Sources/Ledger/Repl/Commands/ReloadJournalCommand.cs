@@ -1,6 +1,6 @@
 using System;
 
-namespace Ledger.Commands
+namespace Ledger.Repl.Commands
 {
     internal class ReloadJournalCommand : CommandBase<ReloadJournalOptions>
     {
@@ -30,7 +30,7 @@ namespace Ledger.Commands
             }
         }
 
-        public ReloadJournalCommand(IController controller) : base(controller)
+        public ReloadJournalCommand(IReplController controller) : base(controller)
         {
         }
 

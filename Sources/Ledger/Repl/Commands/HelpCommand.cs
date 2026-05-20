@@ -1,7 +1,7 @@
 using System;
 using System.Linq;
 
-namespace Ledger.Commands
+namespace Ledger.Repl.Commands
 {
     internal class HelpCommand : CommandBase<HelpOptions>
     {
@@ -21,7 +21,7 @@ namespace Ledger.Commands
             }
         }
 
-        public HelpCommand(IController controller) : base(controller)
+        public HelpCommand(IReplController controller) : base(controller)
         {
         }
 

@@ -2,7 +2,7 @@ using System;
 using CommandLine;
 using Ledger.Reports;
 
-namespace Ledger.Commands
+namespace Ledger.Repl.Commands
 {
     internal class PrintBalanceCheckCommand : CommandBase<PrintBalanceCheckOptions>
     {
@@ -40,7 +40,7 @@ namespace Ledger.Commands
             }
         }
 
-        public PrintBalanceCheckCommand(IController controller) : base(controller)
+        public PrintBalanceCheckCommand(IReplController controller) : base(controller)
         {
         }
 

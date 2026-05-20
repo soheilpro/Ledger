@@ -1,6 +1,6 @@
 using System;
 
-namespace Ledger
+namespace Ledger.Repl
 {
   public class CommandException : Exception
     {

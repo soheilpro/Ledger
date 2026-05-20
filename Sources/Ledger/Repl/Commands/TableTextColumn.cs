@@ -1,6 +1,6 @@
 using System;
 
-namespace Ledger.Commands
+namespace Ledger.Repl.Commands
 {
     public class TableTextColumn<TRow> : TableColumn where TRow : class
     {

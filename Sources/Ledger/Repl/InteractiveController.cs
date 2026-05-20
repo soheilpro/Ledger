@@ -1,18 +1,18 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using Ledger.Commands;
 using Ledger.Core;
+using Ledger.Repl.Commands;
 using Ledger.Journal;
 
-namespace Ledger
+namespace Ledger.Repl
 {
-    internal class Controller : IController, IAutoCompleteHandler
+    internal class ReplController : IReplController, IAutoCompleteHandler
     {
         public IContext _context;
         public ICollection<ICommand> _commands;
 
-        public Controller(IContext context)
+        public ReplController(IContext context)
         {
             _context = context;
             _commands = new ICommand[] {

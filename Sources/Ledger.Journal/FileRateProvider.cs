@@ -29,7 +29,7 @@ namespace Ledger.Journal
                 if (string.IsNullOrEmpty(trimmedLine) || trimmedLine.StartsWith("#", StringComparison.Ordinal))
                     continue;
 
-                var parts = trimmedLine.Split(new[] { ' ', '\t' }, StringSplitOptions.RemoveEmptyEntries);
+                var parts = trimmedLine.Split([' ', '\t'], StringSplitOptions.RemoveEmptyEntries);
 
                 if (parts.Length != 3)
                     throw new ValidationException($"Invalid exchange rate line: {line}");

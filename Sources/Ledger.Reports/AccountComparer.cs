@@ -7,7 +7,7 @@ namespace Ledger.Reports
 {
     public class AccountComparer : IComparer<IAccount>
     {
-        private string[] _order = new[] { "Assets", "Liabilities", "Equity" };
+        private string[] _order = ["Assets", "Liabilities", "Equity"];
 
         public int Compare(IAccount x, IAccount y)
         {

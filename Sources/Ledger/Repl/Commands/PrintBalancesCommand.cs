@@ -19,9 +19,9 @@ namespace Ledger.Repl.Commands
         {
             get
             {
-                return new[] {
+                return [
                     "b",
-                };
+                ];
             }
         }
 
@@ -48,7 +48,7 @@ namespace Ledger.Repl.Commands
         public override string[] GetSuggestions(string arg, int index, IContext context)
         {
             if (arg.StartsWith("--"))
-                return GetOptionSuggestions(arg, index, context, new string[] { "at", "asset", "all-levels", "no-children", "zero" });
+                return GetOptionSuggestions(arg, index, context, ["at", "asset", "all-levels", "no-children", "zero"]);
 
             if (arg.StartsWith("@"))
                 return GetMarkSuggestions(arg, index, context);

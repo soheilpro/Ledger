@@ -12,5 +12,8 @@ function _publish {
 }
 
 _publish linux-x64
+_publish linux-arm64
 _publish osx-x64
+_publish osx-arm64
 _publish win-x64
+_publish win-arm64

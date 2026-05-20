@@ -22,5 +22,8 @@ function _zip {
 }
 
 _tar linux-x64
+_tar linux-arm64
 _tar osx-x64
+_tar osx-arm64
 _zip win-x64
+_zip win-arm64

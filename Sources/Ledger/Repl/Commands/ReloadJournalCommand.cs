@@ -16,9 +16,9 @@ namespace Ledger.Repl.Commands
         {
             get
             {
-                return new[] {
+                return [
                     "r",
-                };
+                ];
             }
         }
 

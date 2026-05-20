@@ -19,7 +19,7 @@ namespace Ledger.Repl.Commands
         {
             get
             {
-                return new string[0];
+                return [];
             }
         }
 

@@ -118,7 +118,7 @@ namespace Ledger.Repl
         char[] IAutoCompleteHandler.Separators {
             get;
             set;
-        } = new char[] { ' ' };
+        } = [' '];
 
         string[] IAutoCompleteHandler.GetSuggestions(string line, int cursorIndex)
         {

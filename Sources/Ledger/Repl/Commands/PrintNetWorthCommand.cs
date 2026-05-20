@@ -22,9 +22,9 @@ namespace Ledger.Repl.Commands
         {
             get
             {
-                return new[] {
+                return [
                     "nw",
-                };
+                ];
             }
         }
 
@@ -51,7 +51,7 @@ namespace Ledger.Repl.Commands
         public override string[] GetSuggestions(string arg, int index, IContext context)
         {
             if (arg.StartsWith("--"))
-                return GetOptionSuggestions(arg, index, context, new string[] { "at" });
+                return GetOptionSuggestions(arg, index, context, ["at"]);
 
             if (arg.StartsWith("@"))
                 return GetMarkSuggestions(arg, index, context);

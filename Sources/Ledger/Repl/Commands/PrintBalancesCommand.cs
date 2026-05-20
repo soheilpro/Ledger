@@ -63,15 +63,17 @@ namespace Ledger.Repl.Commands
         {
             context.JournalManager.ReloadJournal();
 
-            var reportBuilder = new BalanceReportBuilder();
-            reportBuilder.Journal = context.JournalManager.Journal;
-            reportBuilder.Book = "default";
-            reportBuilder.AccountQuery = options.AccountQuery;
-            reportBuilder.Index = ResolveIndex(options.Index, context, false);
-            reportBuilder.AssetQuery = options.AssetQuery;
-            reportBuilder.AllLevels = options.AllLevels;
-            reportBuilder.NoChildren = options.NoChildren;
-            reportBuilder.IncludeZeroBalances = options.IncludeZeroBalances;
+            var reportBuilder = new BalanceReportBuilder
+            {
+                Journal = context.JournalManager.Journal,
+                Book = "default",
+                AccountQuery = options.AccountQuery,
+                Index = ResolveIndex(options.Index, context, false),
+                AssetQuery = options.AssetQuery,
+                AllLevels = options.AllLevels,
+                NoChildren = options.NoChildren,
+                IncludeZeroBalances = options.IncludeZeroBalances
+            };
 
             var report = reportBuilder.GetReport();
 

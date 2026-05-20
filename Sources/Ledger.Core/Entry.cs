@@ -49,13 +49,15 @@ namespace Ledger.Core
 
         public virtual void AddItem(IBook book, IAccount account, IAsset asset, decimal debit, decimal credit)
         {
-            var entryItem = new EntryItem();
-            entryItem.Entry = this;
-            entryItem.Book = book;
-            entryItem.Account = account;
-            entryItem.Asset = asset;
-            entryItem.Debit = debit;
-            entryItem.Credit = credit;
+            var entryItem = new EntryItem
+            {
+                Entry = this,
+                Book = book,
+                Account = account,
+                Asset = asset,
+                Debit = debit,
+                Credit = credit
+            };
 
             this.Items.Add(entryItem);
         }

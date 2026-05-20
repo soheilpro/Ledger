@@ -62,14 +62,16 @@ namespace Ledger.Reports
             {
                 var balanceItem = ledger.GetBalanceAt(book, entryItem.Entry.Index).Items.GetBalanceItem(entryItem.Account, entryItem.Asset);
 
-                var reportItem = new EntryItemsReportItem();
-                reportItem.Index = entryItem.Entry.Index;
-                reportItem.Account = entryItem.Account;
-                reportItem.Asset = entryItem.Asset;
-                reportItem.Debit = entryItem.Debit;
-                reportItem.Credit = entryItem.Credit;
-                reportItem.BalanceDebit = balanceItem.BalanceDebit;
-                reportItem.BalanceCredit = balanceItem.BalanceCredit;
+                var reportItem = new EntryItemsReportItem
+                {
+                    Index = entryItem.Entry.Index,
+                    Account = entryItem.Account,
+                    Asset = entryItem.Asset,
+                    Debit = entryItem.Debit,
+                    Credit = entryItem.Credit,
+                    BalanceDebit = balanceItem.BalanceDebit,
+                    BalanceCredit = balanceItem.BalanceCredit
+                };
 
                 reportItems.Add(reportItem);
             }

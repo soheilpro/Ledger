@@ -64,13 +64,15 @@ namespace Ledger.Repl.Commands
         {
             context.JournalManager.ReloadJournal();
 
-            var reportBuilder = new ProfitLossReportBuilder();
-            reportBuilder.Journal = context.JournalManager.Journal;
-            reportBuilder.Book = "default";
-            reportBuilder.AccountQuery = options.AccountQuery;
-            reportBuilder.StartIndex = ResolveIndex(options.StartIndex, context, false);
-            reportBuilder.EndIndex = ResolveIndex(options.EndIndex, context, false) ?? context.JournalManager.Journal.Entries.LastOrDefault().Index?.ToString();
-            reportBuilder.AssetQuery = options.AssetQuery;
+            var reportBuilder = new ProfitLossReportBuilder
+            {
+                Journal = context.JournalManager.Journal,
+                Book = "default",
+                AccountQuery = options.AccountQuery,
+                StartIndex = ResolveIndex(options.StartIndex, context, false),
+                EndIndex = ResolveIndex(options.EndIndex, context, false) ?? context.JournalManager.Journal.Entries.LastOrDefault().Index?.ToString(),
+                AssetQuery = options.AssetQuery
+            };
 
             var report = reportBuilder.GetReport();
 

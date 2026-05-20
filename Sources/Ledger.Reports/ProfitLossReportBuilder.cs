@@ -57,11 +57,13 @@ namespace Ledger.Reports
             {
                 foreach (var balanceItem in endBalance.Items.GetBalanceItemsCombined(new QueryAccountPredicate(accountId + ":**")))
                 {
-                    var reportItem = new ProfitLossReportItem();
-                    reportItem.Account = new Account(accountId);
-                    reportItem.Asset = balanceItem.Asset;
-                    reportItem.TotalDebit = balanceItem.TotalDebit;
-                    reportItem.TotalCredit = balanceItem.TotalCredit;
+                    var reportItem = new ProfitLossReportItem
+                    {
+                        Account = new Account(accountId),
+                        Asset = balanceItem.Asset,
+                        TotalDebit = balanceItem.TotalDebit,
+                        TotalCredit = balanceItem.TotalCredit
+                    };
 
                     reportItems.Add(reportItem);
                 }

@@ -42,11 +42,13 @@ namespace Ledger.Reports
 
             foreach (var balanceItem in balanceItems)
             {
-                var reportItem = new BalanceCheckReportItem();
-                reportItem.Asset = balanceItem.Asset;
-                reportItem.Assets = balance.Items.GetBalanceItemCombined(new QueryAccountPredicate("Assets:**"), balanceItem.Asset).BalanceDebitOrDefault();
-                reportItem.Liabilities = balance.Items.GetBalanceItemCombined(new QueryAccountPredicate("Liabilities:**"), balanceItem.Asset).BalanceDebitOrDefault();
-                reportItem.Equity = balance.Items.GetBalanceItemCombined(new QueryAccountPredicate("Equity:**"), balanceItem.Asset).BalanceDebitOrDefault();
+                var reportItem = new BalanceCheckReportItem
+                {
+                    Asset = balanceItem.Asset,
+                    Assets = balance.Items.GetBalanceItemCombined(new QueryAccountPredicate("Assets:**"), balanceItem.Asset).BalanceDebitOrDefault(),
+                    Liabilities = balance.Items.GetBalanceItemCombined(new QueryAccountPredicate("Liabilities:**"), balanceItem.Asset).BalanceDebitOrDefault(),
+                    Equity = balance.Items.GetBalanceItemCombined(new QueryAccountPredicate("Equity:**"), balanceItem.Asset).BalanceDebitOrDefault()
+                };
                 reportItem.LiabilitiesAndEquity = reportItem.Liabilities + reportItem.Equity;
                 reportItem.Diff = reportItem.Assets + reportItem.LiabilitiesAndEquity;
 

@@ -138,9 +138,11 @@ namespace Ledger.Journal
         private IEntry ReadEntry(Directive directive, IEnumerator<string> lines)
         {
             var entryItemRegex = new Regex(@"^\s*((?<book>.*?)\s+)?(?<account>.*?)\s+(?<asset>.*?)\s+(?<amount>-?[\d,.]+)\s*$");
-            var entry = new Entry();
-            entry.Index = directive.Data;
-            entry.Type = EntryType.Normal;
+            var entry = new Entry
+            {
+                Index = directive.Data,
+                Type = EntryType.Normal
+            };
 
             while (true)
             {
@@ -190,8 +192,10 @@ namespace Ledger.Journal
 
         private IMark ReadMark(Directive directive, IEnumerator<string> lines)
         {
-            var mark = new Mark();
-            mark.Name = directive.Data;
+            var mark = new Mark
+            {
+                Name = directive.Data
+            };
 
             return mark;
         }

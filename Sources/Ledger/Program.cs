@@ -21,9 +21,11 @@ namespace Ledger
         {
             var journalManager = new JournalManager(options.JournalPaths.ToArray());
 
-            var context = new Context();
-            context.JournalManager = journalManager;
-            context.RatesPath = options.RatesPath;
+            var context = new Context
+            {
+                JournalManager = journalManager,
+                RatesPath = options.RatesPath
+            };
 
             var controller = new ReplController(context);
 

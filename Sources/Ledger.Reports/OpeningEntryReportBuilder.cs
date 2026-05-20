@@ -54,11 +54,13 @@ namespace Ledger.Reports
 
         private IEntryItem CreateEntryItem(IAccount account, IAsset asset, decimal debit, decimal credit)
         {
-            var entryItem = new EntryItem();
-            entryItem.Account = account;
-            entryItem.Asset = asset;
-            entryItem.Debit = debit;
-            entryItem.Credit = credit;
+            var entryItem = new EntryItem
+            {
+                Account = account,
+                Asset = asset,
+                Debit = debit,
+                Credit = credit
+            };
 
             return entryItem;
         }

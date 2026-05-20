@@ -60,12 +60,14 @@ namespace Ledger.Core
                     balances.Add(balance);
                 }
 
-                var balanceItem = new BalanceItem();
-                balanceItem.Balance = balance;
-                balanceItem.Account = entryItem.Account;
-                balanceItem.Asset = entryItem.Asset;
-                balanceItem.TotalDebit = entryItem.Debit;
-                balanceItem.TotalCredit = entryItem.Credit;
+                var balanceItem = new BalanceItem
+                {
+                    Balance = balance,
+                    Account = entryItem.Account,
+                    Asset = entryItem.Asset,
+                    TotalDebit = entryItem.Debit,
+                    TotalCredit = entryItem.Credit
+                };
 
                 var existingBalanceItem = balance.Items.GetBalanceItem(entryItem.Account, entryItem.Asset);
 

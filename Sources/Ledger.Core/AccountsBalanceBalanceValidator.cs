@@ -5,9 +5,9 @@ namespace Ledger.Core
 {
     public class AccountsBalanceBalanceValidator : IBalanceValidator
     {
-        private IBook _book;
-        private IAccountPredicate _accountPredicate1;
-        private IAccountPredicate _accountPredicate2;
+        private readonly IBook _book;
+        private readonly IAccountPredicate _accountPredicate1;
+        private readonly IAccountPredicate _accountPredicate2;
 
         public AccountsBalanceBalanceValidator(IBook book, IAccountPredicate accountPredicate1, IAccountPredicate accountPredicate2)
         {

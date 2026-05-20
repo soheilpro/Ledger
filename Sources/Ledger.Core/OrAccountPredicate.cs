@@ -6,7 +6,7 @@ namespace Ledger.Core
 {
     public class OrAccountPredicate : IAccountPredicate
     {
-        private ICollection<IAccountPredicate> _predicates;
+        private readonly ICollection<IAccountPredicate> _predicates;
 
         public ICollection<IAccountPredicate> Predicates
         {

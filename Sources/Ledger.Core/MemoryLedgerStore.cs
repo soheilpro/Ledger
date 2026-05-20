@@ -6,9 +6,9 @@ namespace Ledger.Core
 {
     public class MemoryLedgerStore : ILedgerStore
     {
-        private IList<IEntry> _entries = new List<IEntry>();
-        private IList<IEntryItem> _entryItems = new List<IEntryItem>();
-        private IDictionary<IBook, IList<IBalance>> _balancesMap = new Dictionary<IBook, IList<IBalance>>();
+        private readonly IList<IEntry> _entries = new List<IEntry>();
+        private readonly IList<IEntryItem> _entryItems = new List<IEntryItem>();
+        private readonly IDictionary<IBook, IList<IBalance>> _balancesMap = new Dictionary<IBook, IList<IBalance>>();
 
         public virtual void Store(IEntry entry, ICollection<IBalance> balances)
         {

@@ -4,7 +4,7 @@ namespace Ledger
 {
     internal class ColoredConsole : IDisposable
     {
-        private ConsoleColor _originalForegroundColor;
+        private readonly ConsoleColor _originalForegroundColor;
 
         public ColoredConsole(ConsoleColor foregroudColor)
         {

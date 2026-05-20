@@ -4,7 +4,7 @@ namespace Ledger.Repl.Drawing
 {
     public class TableAmountColumn<TRow> : TableColumn where TRow : class
     {
-        private Func<TRow, decimal> _selector;
+        private readonly Func<TRow, decimal> _selector;
 
         public TableAmountColumn(string title, Func<TRow, decimal> selector) : base(title)
         {

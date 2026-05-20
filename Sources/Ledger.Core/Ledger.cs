@@ -6,7 +6,7 @@ namespace Ledger.Core
 {
     public class Ledger : ILedger
     {
-        private ILedgerStore _store;
+        private readonly ILedgerStore _store;
 
         public ICollection<IEntryValidator> EntryValidators
         {

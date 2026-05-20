@@ -79,12 +79,14 @@ namespace Ledger.Repl.Commands
 
             context.JournalManager.ReloadJournal();
 
-            var reportBuilder = new NetWorthReportBuilder();
-            reportBuilder.Journal = context.JournalManager.Journal;
-            reportBuilder.Book = "default";
-            reportBuilder.Index = ResolveIndex(options.Index, context, false);
-            reportBuilder.Asset = new Asset(options.AssetId);
-            reportBuilder.RateProvider = FileRateProvider.Load(context.RatesPath);
+            var reportBuilder = new NetWorthReportBuilder()
+            {
+                Journal = context.JournalManager.Journal,
+                Book = "default",
+                Index = ResolveIndex(options.Index, context, false),
+                Asset = new Asset(options.AssetId),
+                RateProvider = FileRateProvider.Load(context.RatesPath)
+            };
 
             var report = reportBuilder.GetReport();
 

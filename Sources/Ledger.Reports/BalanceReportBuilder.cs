@@ -74,11 +74,13 @@ namespace Ledger.Reports
 
                 foreach (var balanceItem in balance.Items.GetBalanceItemsCombined(predicate))
                 {
-                    var reportItem = new BalanceReportItem();
-                    reportItem.Account = new Account(accountId);
-                    reportItem.Asset = balanceItem.Asset;
-                    reportItem.TotalDebit = balanceItem.TotalDebit;
-                    reportItem.TotalCredit = balanceItem.TotalCredit;
+                    var reportItem = new BalanceReportItem()
+                    {
+                        Account = new Account(accountId),
+                        Asset = balanceItem.Asset,
+                        TotalDebit = balanceItem.TotalDebit,
+                        TotalCredit = balanceItem.TotalCredit
+                    };
                     reportItem.BalanceDebit = reportItem.TotalDebit > reportItem.TotalCredit ? reportItem.TotalDebit - reportItem.TotalCredit : 0;
                     reportItem.BalanceCredit = reportItem.TotalCredit > reportItem.TotalDebit ? reportItem.TotalCredit - reportItem.TotalDebit : 0;
 

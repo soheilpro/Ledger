@@ -46,10 +46,12 @@ namespace Ledger.Repl.Commands
         {
             context.JournalManager.ReloadJournal();
 
-            var reportBuilder = new OpeningEntryReportBuilder();
-            reportBuilder.Journal = context.JournalManager.Journal;
-            reportBuilder.Book = "default";
-            reportBuilder.Index = ResolveIndex(options.Index, context, false);
+            var reportBuilder = new OpeningEntryReportBuilder()
+            {
+                Journal = context.JournalManager.Journal,
+                Book = "default",
+                Index = ResolveIndex(options.Index, context, false)
+            };
 
             var report = reportBuilder.GetReport();
 

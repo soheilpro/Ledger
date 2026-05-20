@@ -60,11 +60,13 @@ namespace Ledger.Repl.Commands
         {
             context.JournalManager.ReloadJournal();
 
-            var reportBuilder = new BalanceCheckReportBuilder();
-            reportBuilder.Journal = context.JournalManager.Journal;
-            reportBuilder.Book = "default";
-            reportBuilder.Index = ResolveIndex(options.Index, context, false);
-            reportBuilder.AssetQuery = options.AssetQuery;
+            var reportBuilder = new BalanceCheckReportBuilder()
+            {
+                Journal = context.JournalManager.Journal,
+                Book = "default",
+                Index = ResolveIndex(options.Index, context, false),
+                AssetQuery = options.AssetQuery
+            };
 
             var report = reportBuilder.GetReport();
 

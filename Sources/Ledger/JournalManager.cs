@@ -6,7 +6,7 @@ namespace Ledger
 {
     internal class JournalManager : IJournalManager
     {
-        private string[] _journalPaths;
+        private readonly string[] _journalPaths;
         private IJournal _journal;
         private string[] _accountIds;
         private string[] _markNames;

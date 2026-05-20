@@ -5,7 +5,7 @@ namespace Ledger.Repl.Drawing
 {
     public class TableAccountColumn<TRow> : TableColumn where TRow : class
     {
-        private Func<TRow, IAccount> _selector;
+        private readonly Func<TRow, IAccount> _selector;
 
         public TableAccountColumn(string title, Func<TRow, IAccount> selector) : base(title)
         {

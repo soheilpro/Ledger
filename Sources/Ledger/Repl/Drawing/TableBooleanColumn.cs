@@ -4,9 +4,9 @@ namespace Ledger.Repl.Drawing
 {
     public class TableBooleanColumn<TRow> : TableColumn where TRow : class
     {
-        private Func<TRow, bool> _selector;
-        private string _trueText;
-        private string _falseText;
+        private readonly Func<TRow, bool> _selector;
+        private readonly string _trueText;
+        private readonly string _falseText;
 
         public TableBooleanColumn(string title, Func<TRow, bool> selector, string trueText, string falseText) : base(title)
         {

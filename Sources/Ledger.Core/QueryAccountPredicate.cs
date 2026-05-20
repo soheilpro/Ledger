@@ -4,8 +4,8 @@ namespace Ledger.Core
 {
     public class QueryAccountPredicate : IAccountPredicate
     {
-        private string _query;
-        private string[] _queryParts;
+        private readonly string _query;
+        private readonly string[] _queryParts;
 
         public string Query
         {

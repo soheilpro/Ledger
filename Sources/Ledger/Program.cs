@@ -10,10 +10,10 @@ namespace Ledger
     {
         public static void Main(string[] args)
         {
-            var parser = new CommandLine.Parser(configuration => configuration.HelpWriter = null);
+            var parser = new Parser(configuration => configuration.HelpWriter = null);
 
             parser.ParseArguments<Options>(args)
-                .WithParsed<Options>(Run)
+                .WithParsed(Run)
                 .WithNotParsed((errors) => Console.WriteLine($"Usage: ledger <journal> [<journal> ...] [--rates <path>]"));
         }
 

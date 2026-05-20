@@ -10,7 +10,7 @@ namespace Ledger.Reports
     {
         protected ILedger GetLedger(IJournal journal)
         {
-            var ledger = new Ledger.Core.Ledger();
+            var ledger = new Core.Ledger();
             ledger.EntryValidators.Add(new IntegrityEntryValidator());
             ledger.EntryValidators.Add(new AccountsBalanceEntryValidator(new QueryAccountPredicate("Assets:**"), new QueryAccountPredicate("Liabilities|Equity:**")));
             ledger.BalanceValidators.Add(new AccountsBalanceBalanceValidator(new Book("Default"), new QueryAccountPredicate("Assets:**"), new QueryAccountPredicate("Liabilities|Equity:**")));

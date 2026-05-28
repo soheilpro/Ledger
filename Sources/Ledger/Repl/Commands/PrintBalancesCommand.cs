@@ -29,7 +29,7 @@ namespace Ledger.Repl.Commands
         {
             get
             {
-                return "[account] [--at index] [--all-levels] [--no-children] [--zero]";
+                return "[account|account:*|account:**] [--at index] [--asset asset] [--zero]";
             }
         }
 
@@ -48,7 +48,7 @@ namespace Ledger.Repl.Commands
         public override string[] GetSuggestions(string arg, int index, IContext context)
         {
             if (arg.StartsWith("--"))
-                return GetOptionSuggestions(arg, index, context, ["at", "asset", "all-levels", "no-children", "zero"]);
+                return GetOptionSuggestions(arg, index, context, ["at", "asset", "zero"]);
 
             if (arg.StartsWith("@"))
                 return GetMarkSuggestions(arg, index, context);
@@ -70,8 +70,6 @@ namespace Ledger.Repl.Commands
                 AccountQuery = options.AccountQuery,
                 Index = ResolveIndex(options.Index, context, false),
                 AssetQuery = options.AssetQuery,
-                AllLevels = options.AllLevels,
-                NoChildren = options.NoChildren,
                 IncludeZeroBalances = options.IncludeZeroBalances
             };
 
@@ -113,20 +111,6 @@ namespace Ledger.Repl.Commands
 
         [Option("asset")]
         public string AssetQuery
-        {
-            get;
-            set;
-        }
-
-        [Option("all-levels")]
-        public bool AllLevels
-        {
-            get;
-            set;
-        }
-
-        [Option("no-children")]
-        public bool NoChildren
         {
             get;
             set;

@@ -67,6 +67,12 @@ Equity:ProfitLoss:Expense:Tip   | EUR   |        2.98 |            0 |          
 Equity:ProfitLoss:Income:Salary | EUR   |           0 |        5,000 |             0 |          5,000
 ```
 
+Balance queries support hierarchical wildcards:
+
++ `balances Assets` returns only `Assets`
++ `balances Assets:*` returns the immediate children under `Assets`
++ `balances Assets:**` returns all sub-accounts under `Assets` at any depth
+
 #### View Your Profit and Loss
 To see how much you have gained, or lost, run the `profitloss` (or `pl` for short) command:
 

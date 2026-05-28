@@ -38,18 +38,6 @@ namespace Ledger.Reports
             set;
         }
 
-        public bool AllLevels
-        {
-            get;
-            set;
-        }
-
-        public bool NoChildren
-        {
-            get;
-            set;
-        }
-
         public bool IncludeZeroBalances
         {
             get;
@@ -60,17 +48,13 @@ namespace Ledger.Reports
         {
             var ledger = GetLedger(Journal);
             var book = new Book(Book);
-            var accountPredicate = new QueryAccountPredicate(NoChildren ? AccountQuery : AccountQuery + ":**");
             var balance = ledger.GetBalanceAtOrBefore(book, Index);
-            var accountIds = AllLevels ? GetAllAccountIds(balance, accountPredicate) : GetAccountIds(balance, accountPredicate);
+            var accountIds = GetReportAccountIds(balance, AccountQuery);
             var reportItems = new List<BalanceReportItem>();
 
             foreach (var accountId in accountIds)
             {
-                if (!accountPredicate.Matches(new Account(accountId)))
-                    continue;
-
-                var predicate = new QueryAccountPredicate(!AllLevels ? accountId : accountId + ":**");
+                var predicate = new QueryAccountPredicate(accountId + ":**");
 
                 foreach (var balanceItem in balance.Items.GetBalanceItemsCombined(predicate))
                 {
@@ -101,6 +85,17 @@ namespace Ledger.Reports
             reportItems = reportItems.OrderBy(reportItem => reportItem.Account, new AccountComparer()).ThenBy(reportItem => reportItem.Asset, new AssetComparer()).ToList();
 
             return new BalanceReport(reportItems.ToArray());
+        }
+
+        private static IEnumerable<string> GetReportAccountIds(IBalance balance, string accountQuery)
+        {
+            if (accountQuery.EndsWith(":**", StringComparison.Ordinal))
+                return GetAccountIds(balance, new QueryAccountPredicate(accountQuery));
+
+            if (accountQuery.Equals("**", StringComparison.Ordinal))
+                return GetAccountIds(balance, new QueryAccountPredicate(accountQuery));
+
+            return GetChildAccountIds(balance, accountQuery);
         }
     }
 }

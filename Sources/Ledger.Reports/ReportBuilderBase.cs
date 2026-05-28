@@ -46,9 +46,9 @@ namespace Ledger.Reports
 
         protected static IEnumerable<string> GetChildAccountIds(IBalance balance, string account)
         {
-            var accountPredicate = new QueryAccountPredicate(account + ":**");
+            var accountPredicate = new QueryAccountPredicate(string.IsNullOrEmpty(account) ? "**" : account + ":**");
             var accountIds = balance.Items.GetBalanceItems(accountPredicate).Select(balanceItem => ((Account)balanceItem.Account).Id);
-            var level = account.Split(':').Length;
+            var level = string.IsNullOrEmpty(account) ? 1 : account.Split(':').Length;
 
             return accountIds.Select(accountId => string.Join(":", accountId.Split(':').Take(level))).Distinct();
         }

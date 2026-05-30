@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using CommandLine;
+using Ledger.Rates;
 using Ledger.Repl;
 
 namespace Ledger
@@ -20,11 +21,12 @@ namespace Ledger
         private static void Run(Options options)
         {
             var journalManager = new JournalManager(options.JournalPaths.ToArray());
+            var ratesManager = new RatesManager(options.RatesPath);
 
             var context = new Context()
             {
                 JournalManager = journalManager,
-                RatesPath = options.RatesPath
+                RatesManager = ratesManager
             };
 
             var controller = new ReplController(context);

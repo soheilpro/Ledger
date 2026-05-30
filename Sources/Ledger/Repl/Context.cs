@@ -10,7 +10,7 @@ namespace Ledger.Repl
             set;
         }
 
-        public string RatesPath
+        public IRatesManager RatesManager
         {
             get;
             set;

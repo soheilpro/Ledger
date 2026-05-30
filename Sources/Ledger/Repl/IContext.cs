@@ -9,10 +9,9 @@ namespace Ledger.Repl
             get;
         }
 
-        string RatesPath
+        IRatesManager RatesManager
         {
             get;
-            set;
         }
 
         bool ShouldExit

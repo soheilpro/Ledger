@@ -17,10 +17,10 @@ namespace Ledger.Rates
             var result = new FileRateProvider();
 
             if (string.IsNullOrWhiteSpace(path))
-                return result;
+                throw new RatesException($"Rates file not specified.");
 
             if (!File.Exists(path))
-                return result;
+                throw new RatesException($"Rates file not found.");
 
             foreach (var line in File.ReadAllLines(path))
             {
@@ -32,7 +32,7 @@ namespace Ledger.Rates
                 var parts = trimmedLine.Split([' ', '\t'], StringSplitOptions.RemoveEmptyEntries);
 
                 if (parts.Length != 3)
-                    throw new ValidationException($"Invalid exchange rate line: {line}");
+                    throw new RatesException($"Invalid exchange rate line: {line}");
 
                 var sourceAsset = new Asset(parts[0]);
                 var destinationAsset = new Asset(parts[1]);
@@ -52,7 +52,7 @@ namespace Ledger.Rates
             if (TryGetRate(source, destination, out var rate))
                 return rate;
 
-            throw new ValidationException($"No exchange rate available from '{source}' to '{destination}'.");
+            throw new RatesException($"No exchange rate available from '{source}' to '{destination}'.");
         }
 
         private bool TryGetRate(IAsset source, IAsset destination, out decimal rate)
@@ -103,7 +103,7 @@ namespace Ledger.Rates
                 var reverseRate = reverseNeighbor.Value;
 
                 if (reverseRate == 0m)
-                    throw new ValidationException($"Exchange rate from '{reverseNeighbor.Key}' to '{source}' is zero and cannot be reversed.");
+                    throw new RatesException($"Exchange rate from '{reverseNeighbor.Key}' to '{source}' is zero and cannot be reversed.");
 
                 if (directNeighbors != null && directNeighbors.ContainsKey(reverseNeighbor.Key))
                     continue;

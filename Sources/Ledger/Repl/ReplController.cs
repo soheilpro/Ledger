@@ -4,6 +4,7 @@ using System.Linq;
 using Ledger.Core;
 using Ledger.Repl.Commands;
 using Ledger.Journal;
+using Ledger.Rates;
 
 namespace Ledger.Repl
 {
@@ -90,6 +91,10 @@ namespace Ledger.Repl
                     ConsoleHelper.PrintError(exception.Message);
                 }
                 catch (JournalException exception)
+                {
+                    ConsoleHelper.PrintError(exception.Message);
+                }
+                catch (RatesException exception)
                 {
                     ConsoleHelper.PrintError(exception.Message);
                 }

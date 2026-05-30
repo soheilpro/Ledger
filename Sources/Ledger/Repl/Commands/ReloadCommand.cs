@@ -2,7 +2,7 @@ using System;
 
 namespace Ledger.Repl.Commands
 {
-    internal class ReloadJournalCommand : CommandBase<ReloadJournalOptions>
+    internal class ReloadCommand : CommandBase<ReloadOptions>
     {
         public override string Name
         {
@@ -26,21 +26,22 @@ namespace Ledger.Repl.Commands
         {
             get
             {
-                return "Reload the journal.";
+                return "Reload the journal and rates files.";
             }
         }
 
-        public ReloadJournalCommand(IReplController controller) : base(controller)
+        public ReloadCommand(IReplController controller) : base(controller)
         {
         }
 
-        protected override void Execute(ReloadJournalOptions options, IContext context)
+        protected override void Execute(ReloadOptions options, IContext context)
         {
             context.JournalManager.ReloadJournal();
+            context.RatesManager.ReloadRates();
         }
     }
 
-    internal class ReloadJournalOptions
+    internal class ReloadOptions
     {
     }
 }

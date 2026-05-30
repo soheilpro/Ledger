@@ -25,7 +25,7 @@ namespace Ledger.Repl
                 new PrintProfitLossCommand(this),
                 new PrintNetWorthCommand(this),
                 new PrintOpeningEntryCommand(this),
-                new ReloadJournalCommand(this),
+                new ReloadCommand(this),
             };
         }
 

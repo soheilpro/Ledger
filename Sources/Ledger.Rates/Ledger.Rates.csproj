@@ -6,8 +6,6 @@
 
   <ItemGroup>
     <ProjectReference Include="..\Ledger.Core\Ledger.Core.csproj" />
-    <ProjectReference Include="..\Ledger.Journal\Ledger.Journal.csproj" />
-    <ProjectReference Include="..\Ledger.Rates\Ledger.Rates.csproj" />
   </ItemGroup>
 
 </Project>

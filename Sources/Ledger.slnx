@@ -6,6 +6,7 @@
   </Configurations>
   <Project Path="Ledger.Core/Ledger.Core.csproj" />
   <Project Path="Ledger.Journal/Ledger.Journal.csproj" />
+  <Project Path="Ledger.Rates/Ledger.Rates.csproj" />
   <Project Path="Ledger.Reports/Ledger.Reports.csproj" />
   <Project Path="Ledger/Ledger.csproj" />
 </Solution>

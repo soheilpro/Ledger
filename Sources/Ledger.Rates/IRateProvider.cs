@@ -1,6 +1,6 @@
 using Ledger.Core;
 
-namespace Ledger.Journal
+namespace Ledger.Rates
 {
     public interface IRateProvider
     {

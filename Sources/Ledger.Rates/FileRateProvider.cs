@@ -5,7 +5,7 @@ using System.IO;
 using System.Linq;
 using Ledger.Core;
 
-namespace Ledger.Journal
+namespace Ledger.Rates
 {
     public class FileRateProvider : IRateProvider
     {

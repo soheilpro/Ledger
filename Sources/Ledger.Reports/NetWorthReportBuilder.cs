@@ -1,6 +1,7 @@
 using System;
 using Ledger.Core;
 using Ledger.Journal;
+using Ledger.Rates;
 
 namespace Ledger.Reports
 {

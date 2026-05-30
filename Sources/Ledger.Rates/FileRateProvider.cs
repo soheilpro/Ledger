@@ -9,8 +9,8 @@ namespace Ledger.Rates
 {
     public class FileRateProvider : IRateProvider
     {
-        private readonly Dictionary<IAsset, Dictionary<IAsset, decimal>> _graph = new Dictionary<IAsset, Dictionary<IAsset, decimal>>();
-        private readonly Dictionary<IAsset, Dictionary<IAsset, decimal>> _reverseGraph = new Dictionary<IAsset, Dictionary<IAsset, decimal>>();
+        private readonly Dictionary<IAsset, Dictionary<IAsset, decimal>> _graph = new();
+        private readonly Dictionary<IAsset, Dictionary<IAsset, decimal>> _reverseGraph = new();
 
         public static FileRateProvider Load(string path)
         {

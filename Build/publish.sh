@@ -1,19 +1,14 @@
 #!/bin/sh
 
-DIR=$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)
+[ -z "$1" ] && echo "Syntax: $0 <runtime_identifier>" && exit 1
 
-function _publish {
-  local PLATFORM=$1
+set -euo pipefail
 
-  rm -rf "$DIR/../Publish/$PLATFORM"
-  mkdir -p "$DIR/../Publish/$PLATFORM"
+BUILD_DIR=$(CDPATH= cd -- "$(dirname -- "$0")" && pwd)
+RUNTIME_IDENTIFIER=${1-}
 
-  dotnet publish "$DIR/../Sources/Ledger/Ledger.csproj" --configuration Release --runtime $PLATFORM --output "$DIR/../Publish/$PLATFORM"
-}
+if [ -n "$RUNTIME_IDENTIFIER" ]; then
+	shift
+fi
 
-_publish linux-x64
-_publish linux-arm64
-_publish osx-x64
-_publish osx-arm64
-_publish win-x64
-_publish win-arm64
+exec dotnet msbuild "$BUILD_DIR/Build.proj" -t:Publish ${RUNTIME_IDENTIFIER:+"-p:RuntimeIdentifier=$RUNTIME_IDENTIFIER"} "$@"

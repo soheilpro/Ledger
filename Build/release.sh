@@ -1,29 +1,20 @@
 #!/bin/sh
 
-DIR=$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)
-VERSION=$(grep '<Version>.*</Version>' -o $DIR/../Sources/Ledger/Ledger.csproj | sed -e 's,<Version>\([^<]*\)</Version>,\1,')
+[ -z "$1" ] && echo "Syntax: $0 <runtime_identifier> <archive_format>" && exit 1
+[ -z "$2" ] && echo "Syntax: $0 <runtime_identifier> <archive_format>" && exit 1
 
-function _tar {
-  local PLATFORM=$1
-  local OUTPUT=$DIR/../Releases/Ledger-$VERSION-$PLATFORM.tar.gz
+set -euo pipefail
 
-  mkdir -p "$DIR/../Releases"
-  rm "$OUTPUT"
-  tar -cvzf "$OUTPUT" -C "$DIR/../Publish/$PLATFORM" .
-}
+BUILD_DIR=$(CDPATH= cd -- "$(dirname -- "$0")" && pwd)
+RUNTIME_IDENTIFIER=${1-}
+ARCHIVE_FORMAT=${2-}
 
-function _zip {
-  local PLATFORM=$1
-  local OUTPUT=$DIR/../Releases/Ledger-$VERSION-$PLATFORM.zip
+if [ -n "$RUNTIME_IDENTIFIER" ]; then
+	shift
+fi
 
-  mkdir -p "$DIR/../Releases"
-  rm "$OUTPUT"
-  zip --recurse-paths --junk-paths "$OUTPUT" "$DIR/../Publish/$PLATFORM/"
-}
+if [ -n "$ARCHIVE_FORMAT" ]; then
+	shift
+fi
 
-_tar linux-x64
-_tar linux-arm64
-_tar osx-x64
-_tar osx-arm64
-_zip win-x64
-_zip win-arm64
+exec dotnet msbuild "$BUILD_DIR/Build.proj" -t:Release ${RUNTIME_IDENTIFIER:+"-p:RuntimeIdentifier=$RUNTIME_IDENTIFIER"} ${ARCHIVE_FORMAT:+"-p:ArchiveFormat=$ARCHIVE_FORMAT"} "$@"

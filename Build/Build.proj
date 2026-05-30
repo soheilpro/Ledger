@@ -1,0 +1,104 @@
+<Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+
+  <PropertyGroup>
+    <RepoRoot>$([System.IO.Path]::GetFullPath('$(MSBuildThisFileDirectory)..'))</RepoRoot>
+    <LedgerProject>$(RepoRoot)/Sources/Ledger/Ledger.csproj</LedgerProject>
+    <Configuration Condition="'$(Configuration)' == ''">Debug</Configuration>
+    <PublishConfiguration Condition="'$(PublishConfiguration)' == ''">Release</PublishConfiguration>
+    <PublishRoot>$(RepoRoot)/Publish</PublishRoot>
+    <ReleaseRoot>$(RepoRoot)/Releases</ReleaseRoot>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ReleaseRuntime Include="linux-x64">
+      <ArchiveFormat>tar</ArchiveFormat>
+    </ReleaseRuntime>
+    <ReleaseRuntime Include="linux-arm64">
+      <ArchiveFormat>tar</ArchiveFormat>
+    </ReleaseRuntime>
+    <ReleaseRuntime Include="osx-x64">
+      <ArchiveFormat>tar</ArchiveFormat>
+    </ReleaseRuntime>
+    <ReleaseRuntime Include="osx-arm64">
+      <ArchiveFormat>tar</ArchiveFormat>
+    </ReleaseRuntime>
+    <ReleaseRuntime Include="win-x64">
+      <ArchiveFormat>zip</ArchiveFormat>
+    </ReleaseRuntime>
+    <ReleaseRuntime Include="win-arm64">
+      <ArchiveFormat>zip</ArchiveFormat>
+    </ReleaseRuntime>
+  </ItemGroup>
+
+  <Target Name="ReadVersion" Condition="'$(LedgerVersion)' == ''">
+    <XmlPeek XmlInputPath="$(LedgerProject)" Query="/Project/PropertyGroup/Version/text()">
+      <Output TaskParameter="Result" PropertyName="LedgerVersion" />
+    </XmlPeek>
+
+    <Error Condition="'$(LedgerVersion)' == ''" Text="Could not determine the Ledger version from $(LedgerProject)." />
+  </Target>
+
+  <Target Name="ValidateRuntimeIdentifier">
+    <Error Condition="'$(RuntimeIdentifier)' == ''" Text="Set RuntimeIdentifier, for example: -p:RuntimeIdentifier=osx-arm64" />
+  </Target>
+
+  <Target Name="ValidateArchiveFormat" DependsOnTargets="ValidateRuntimeIdentifier">
+    <Error Condition="'$(ArchiveFormat)' == ''" Text="Set ArchiveFormat to tar or zip, for example: -p:ArchiveFormat=tar" />
+    <Error Condition="'$(ArchiveFormat)' != 'tar' and '$(ArchiveFormat)' != 'zip'" Text="ArchiveFormat must be either tar or zip." />
+  </Target>
+
+  <Target Name="Build">
+    <MSBuild Projects="$(LedgerProject)" Targets="Restore;Build" Properties="Configuration=$(Configuration)" />
+  </Target>
+
+  <Target Name="Publish" DependsOnTargets="ValidateRuntimeIdentifier">
+    <PropertyGroup>
+      <PublishOutputDir>$(PublishRoot)/$(RuntimeIdentifier)</PublishOutputDir>
+    </PropertyGroup>
+
+    <RemoveDir Directories="$(PublishOutputDir)" Condition="Exists('$(PublishOutputDir)')" />
+    <MakeDir Directories="$(PublishOutputDir)" />
+
+    <MSBuild
+      Projects="$(LedgerProject)"
+      Targets="Restore;Publish"
+      Properties="Configuration=$(PublishConfiguration);RuntimeIdentifier=$(RuntimeIdentifier);PublishDir=$(PublishOutputDir)/" />
+  </Target>
+
+  <Target Name="PublishAll">
+    <MSBuild
+      Projects="$(MSBuildProjectFullPath)"
+      Targets="Publish"
+      Properties="RuntimeIdentifier=%(ReleaseRuntime.Identity);PublishConfiguration=$(PublishConfiguration)" />
+  </Target>
+
+  <Target Name="Release" DependsOnTargets="ValidateArchiveFormat;Publish;ReadVersion">
+    <PropertyGroup>
+      <ReleaseBaseName>Ledger-$(LedgerVersion)-$(RuntimeIdentifier)</ReleaseBaseName>
+      <ReleaseFile Condition="'$(ArchiveFormat)' == 'tar'">$(ReleaseRoot)/$(ReleaseBaseName).tar.gz</ReleaseFile>
+      <ReleaseFile Condition="'$(ArchiveFormat)' == 'zip'">$(ReleaseRoot)/$(ReleaseBaseName).zip</ReleaseFile>
+    </PropertyGroup>
+
+    <MakeDir Directories="$(ReleaseRoot)" />
+    <Delete Files="$(ReleaseFile)" Condition="Exists('$(ReleaseFile)')" />
+
+    <Exec
+      Condition="'$(ArchiveFormat)' == 'tar'"
+      Command="tar -czf &quot;$(ReleaseFile)&quot; -C &quot;$(PublishRoot)/$(RuntimeIdentifier)&quot; ." />
+
+    <ZipDirectory
+      Condition="'$(ArchiveFormat)' == 'zip'"
+      SourceDirectory="$(PublishRoot)/$(RuntimeIdentifier)"
+      DestinationFile="$(ReleaseFile)" />
+
+    <Message Importance="High" Text="Created $(ReleaseFile)" />
+  </Target>
+
+  <Target Name="ReleaseAll" DependsOnTargets="ReadVersion">
+    <MSBuild
+      Projects="$(MSBuildProjectFullPath)"
+      Targets="Release"
+      Properties="RuntimeIdentifier=%(ReleaseRuntime.Identity);ArchiveFormat=%(ReleaseRuntime.ArchiveFormat);PublishConfiguration=$(PublishConfiguration);LedgerVersion=$(LedgerVersion)" />
+  </Target>
+
+</Project>

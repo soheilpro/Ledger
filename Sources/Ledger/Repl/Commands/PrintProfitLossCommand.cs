@@ -30,7 +30,7 @@ namespace Ledger.Repl.Commands
         {
             get
             {
-                return "[account] [--start index] [--end index] [--asset asset]";
+                return "[account] [--start index] [--end index] [--asset asset] [--as asset]";
             }
         }
 
@@ -49,7 +49,7 @@ namespace Ledger.Repl.Commands
         public override string[] GetSuggestions(string arg, int index, IContext context)
         {
             if (arg.StartsWith("--"))
-                return GetOptionSuggestions(arg, index, context, ["start", "end", "asset"]);
+                return GetOptionSuggestions(arg, index, context, ["start", "end", "asset", "as"]);
 
             if (arg.StartsWith("@"))
                 return GetMarkSuggestions(arg, index, context);
@@ -64,14 +64,19 @@ namespace Ledger.Repl.Commands
         {
             context.JournalManager.ReloadJournal();
 
+            if (!string.IsNullOrEmpty(options.TargetAsset))
+                context.RatesManager.ReloadRates();
+
             var reportBuilder = new ProfitLossReportBuilder()
             {
                 Journal = context.JournalManager.Journal,
+                RateProvider = context.RatesManager.RateProvider,
                 Book = "default",
                 AccountQuery = options.AccountQuery,
                 StartIndex = ResolveIndex(options.StartIndex, context, false),
                 EndIndex = ResolveIndex(options.EndIndex, context, false) ?? context.JournalManager.Journal.Entries.LastOrDefault().Index?.ToString(),
-                AssetQuery = options.AssetQuery
+                AssetQuery = options.AssetQuery,
+                TargetAsset = options.TargetAsset
             };
 
             var report = reportBuilder.GetReport();
@@ -119,6 +124,13 @@ namespace Ledger.Repl.Commands
 
         [Option("asset")]
         public string AssetQuery
+        {
+            get;
+            set;
+        }
+
+        [Option("as")]
+        public string TargetAsset
         {
             get;
             set;

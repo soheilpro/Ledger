@@ -29,7 +29,7 @@ namespace Ledger.Repl.Commands
         {
             get
             {
-                return "[account] [--at index] [--asset asset] [--zero]";
+                return "[account] [--at index] [--asset asset] [--as asset] [--zero]";
             }
         }
 
@@ -48,7 +48,7 @@ namespace Ledger.Repl.Commands
         public override string[] GetSuggestions(string arg, int index, IContext context)
         {
             if (arg.StartsWith("--"))
-                return GetOptionSuggestions(arg, index, context, ["at", "asset", "zero"]);
+                return GetOptionSuggestions(arg, index, context, ["at", "asset", "as", "zero"]);
 
             if (arg.StartsWith("@"))
                 return GetMarkSuggestions(arg, index, context);
@@ -63,13 +63,18 @@ namespace Ledger.Repl.Commands
         {
             context.JournalManager.ReloadJournal();
 
+            if (!string.IsNullOrEmpty(options.TargetAsset))
+                context.RatesManager.ReloadRates();
+
             var reportBuilder = new BalanceReportBuilder()
             {
                 Journal = context.JournalManager.Journal,
+                RateProvider = context.RatesManager.RateProvider,
                 Book = "default",
                 AccountQuery = options.AccountQuery,
                 Index = ResolveIndex(options.Index, context, false),
                 AssetQuery = options.AssetQuery,
+                TargetAsset = options.TargetAsset,
                 IncludeZeroBalances = options.IncludeZeroBalances
             };
 
@@ -111,6 +116,13 @@ namespace Ledger.Repl.Commands
 
         [Option("asset")]
         public string AssetQuery
+        {
+            get;
+            set;
+        }
+
+        [Option("as")]
+        public string TargetAsset
         {
             get;
             set;

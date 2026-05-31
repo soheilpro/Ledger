@@ -18,12 +18,15 @@ public class PredicateAndValidatorTests
     [Fact]
     public void IntegrityEntryValidator_RejectsUnbalancedEntries()
     {
+        var mainBook = new Book("main");
+        var usd = new Asset("USD");
+        var cash = new Account("assets:cash");
         var entry = new Entry
         {
             Index = 1
         };
 
-        entry.AddItem(LedgerTestData.MainBook, LedgerTestData.Cash, LedgerTestData.Usd, 10m, 0m);
+        entry.AddItem(mainBook, cash, usd, 10m, 0m);
 
         var exception = Assert.Throws<ValidationException>(() => new IntegrityEntryValidator().Validate(entry));
 

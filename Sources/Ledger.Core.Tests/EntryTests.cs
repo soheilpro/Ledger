@@ -5,16 +5,20 @@ public class EntryTests
     [Fact]
     public void AddItem_MapsSignedAmountsToDebitAndCredit()
     {
+        var mainBook = new Book("main");
+        var usd = new Asset("USD");
+        var cash = new Account("assets:cash");
+        var income = new Account("income:salary");
         var entry = new Entry
         {
             Index = 1
         };
 
-        entry.AddItem(LedgerTestData.MainBook, LedgerTestData.Cash, LedgerTestData.Usd, 25m);
-        entry.AddItem(LedgerTestData.MainBook, LedgerTestData.Income, LedgerTestData.Usd, -25m);
+        entry.AddItem(mainBook, cash, usd, 25m);
+        entry.AddItem(mainBook, income, usd, -25m);
 
-        var cashItem = Assert.IsAssignableFrom<IEntryItem>(entry.Items.GetEntryItem(LedgerTestData.MainBook, LedgerTestData.Cash, LedgerTestData.Usd));
-        var incomeItem = Assert.IsAssignableFrom<IEntryItem>(entry.Items.GetEntryItem(LedgerTestData.MainBook, LedgerTestData.Income, LedgerTestData.Usd));
+        var cashItem = Assert.IsAssignableFrom<IEntryItem>(entry.Items.GetEntryItem(mainBook, cash, usd));
+        var incomeItem = Assert.IsAssignableFrom<IEntryItem>(entry.Items.GetEntryItem(mainBook, income, usd));
 
         Assert.Equal(25m, cashItem.Debit);
         Assert.Equal(0m, cashItem.Credit);
@@ -25,11 +29,17 @@ public class EntryTests
     [Fact]
     public void AddItems_UsesExistingCreditBalanceBeforeDebitAccount()
     {
-        var ledger = LedgerTestData.CreateLedger();
-        ledger.AddEntry(LedgerTestData.CreateBalancedEntry(
+        var mainBook = new Book("main");
+        var usd = new Asset("USD");
+        var cash = new Account("assets:cash");
+        var payable = new Account("liabilities:payable");
+        var prepaid = new Account("assets:prepaid");
+        var ledger = new Ledger();
+        ledger.EntryValidators.Add(new IntegrityEntryValidator());
+        ledger.AddEntry(CreateBalancedEntry(
             1,
-            (LedgerTestData.Cash, 100m, 0m),
-            (LedgerTestData.Payable, 0m, 100m)));
+            (cash, 100m, 0m),
+            (payable, 0m, 100m)));
 
         var entry = new Entry
         {
@@ -38,26 +48,43 @@ public class EntryTests
 
         entry.AddItems(
             ledger,
-            LedgerTestData.MainBook,
+            mainBook,
             new QueryAccountPredicate("liabilities:**"),
-            LedgerTestData.Prepaid,
-            LedgerTestData.Payable,
-            LedgerTestData.Usd,
+            prepaid,
+            payable,
+            usd,
             debit: 150m,
             credit: 0m);
 
-        var payableItem = Assert.IsAssignableFrom<IEntryItem>(entry.Items.GetEntryItem(LedgerTestData.MainBook, LedgerTestData.Payable, LedgerTestData.Usd));
-        var prepaidItem = Assert.IsAssignableFrom<IEntryItem>(entry.Items.GetEntryItem(LedgerTestData.MainBook, LedgerTestData.Prepaid, LedgerTestData.Usd));
+        var payableItem = Assert.IsAssignableFrom<IEntryItem>(entry.Items.GetEntryItem(mainBook, payable, usd));
+        var prepaidItem = Assert.IsAssignableFrom<IEntryItem>(entry.Items.GetEntryItem(mainBook, prepaid, usd));
 
         Assert.Equal(100m, payableItem.Debit);
         Assert.Equal(0m, payableItem.Credit);
         Assert.Equal(50m, prepaidItem.Debit);
         Assert.Equal(0m, prepaidItem.Credit);
+
+        Entry CreateBalancedEntry(int index, params (Account Account, decimal Debit, decimal Credit)[] items)
+        {
+            var balancedEntry = new Entry
+            {
+                Index = index
+            };
+
+            foreach (var item in items)
+                balancedEntry.AddItem(mainBook, item.Account, usd, item.Debit, item.Credit);
+
+            return balancedEntry;
+        }
     }
 
     [Fact]
     public void AddItems_RejectsInvalidAmounts()
     {
+        var mainBook = new Book("main");
+        var usd = new Asset("USD");
+        var payable = new Account("liabilities:payable");
+        var prepaid = new Account("assets:prepaid");
         var entry = new Entry
         {
             Index = 1
@@ -65,31 +92,31 @@ public class EntryTests
 
         Assert.Throws<ArgumentException>(() => entry.AddItems(
             new Ledger(),
-            LedgerTestData.MainBook,
+            mainBook,
             new TrueAccountPredicate(),
-            LedgerTestData.Prepaid,
-            LedgerTestData.Payable,
-            LedgerTestData.Usd,
+            prepaid,
+            payable,
+            usd,
             debit: -1m,
             credit: 0m));
 
         Assert.Throws<ArgumentException>(() => entry.AddItems(
             new Ledger(),
-            LedgerTestData.MainBook,
+            mainBook,
             new TrueAccountPredicate(),
-            LedgerTestData.Prepaid,
-            LedgerTestData.Payable,
-            LedgerTestData.Usd,
+            prepaid,
+            payable,
+            usd,
             debit: 0m,
             credit: 0m));
 
         Assert.Throws<ArgumentException>(() => entry.AddItems(
             new Ledger(),
-            LedgerTestData.MainBook,
+            mainBook,
             new TrueAccountPredicate(),
-            LedgerTestData.Prepaid,
-            LedgerTestData.Payable,
-            LedgerTestData.Usd,
+            prepaid,
+            payable,
+            usd,
             debit: 1m,
             credit: 1m));
     }

@@ -4,6 +4,7 @@
     <Platform Name="x64" />
     <Platform Name="x86" />
   </Configurations>
+  <Project Path="Ledger.Core.Tests/Ledger.Core.Tests.csproj" />
   <Project Path="Ledger.Core/Ledger.Core.csproj" />
   <Project Path="Ledger.Journal/Ledger.Journal.csproj" />
   <Project Path="Ledger.Rates/Ledger.Rates.csproj" />

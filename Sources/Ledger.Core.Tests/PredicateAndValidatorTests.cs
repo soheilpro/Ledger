@@ -5,28 +5,28 @@ public class PredicateAndValidatorTests
     [Fact]
     public void QueryAccountPredicate_SupportsWildcardOrAndNegationMatching()
     {
-        var account = new Account("assets:cash:checking");
+        var cashCheckingAccount = new Account("Assets:Cash:Checking");
 
-        Assert.True(new QueryAccountPredicate("assets:**").Matches(account));
-        Assert.True(new QueryAccountPredicate("assets:*:checking").Matches(account));
-        Assert.True(new QueryAccountPredicate("assets:cash|bank:checking").Matches(account));
-        Assert.True(new QueryAccountPredicate("assets:^savings:checking").Matches(account));
-        Assert.False(new QueryAccountPredicate("assets:^cash:checking").Matches(account));
-        Assert.False(new QueryAccountPredicate("liabilities:**").Matches(account));
+        Assert.True(new QueryAccountPredicate("Assets:**").Matches(cashCheckingAccount));
+        Assert.True(new QueryAccountPredicate("Assets:*:Checking").Matches(cashCheckingAccount));
+        Assert.True(new QueryAccountPredicate("Assets:Cash|Bank:Checking").Matches(cashCheckingAccount));
+        Assert.True(new QueryAccountPredicate("Assets:^Savings:Checking").Matches(cashCheckingAccount));
+        Assert.False(new QueryAccountPredicate("Assets:^Cash:Checking").Matches(cashCheckingAccount));
+        Assert.False(new QueryAccountPredicate("Liabilities:**").Matches(cashCheckingAccount));
     }
 
     [Fact]
     public void IntegrityEntryValidator_RejectsUnbalancedEntries()
     {
         var mainBook = new Book("main");
-        var usd = new Asset("USD");
-        var cash = new Account("assets:cash");
+        var usdAsset = new Asset("USD");
+        var cashAccount = new Account("Assets:Cash");
         var entry = new Entry
         {
             Index = 1
         };
 
-        entry.AddItem(mainBook, cash, usd, 10m, 0m);
+        entry.AddItem(mainBook, cashAccount, usdAsset, 10m, 0m);
 
         var exception = Assert.Throws<ValidationException>(() => new IntegrityEntryValidator().Validate(entry));
 

@@ -6,19 +6,19 @@ public class EntryTests
     public void AddItem_MapsSignedAmountsToDebitAndCredit()
     {
         var mainBook = new Book("main");
-        var usd = new Asset("USD");
-        var cash = new Account("assets:cash");
-        var income = new Account("income:salary");
+        var usdAsset = new Asset("USD");
+        var cashAccount = new Account("Assets:Cash");
+        var incomeAccount = new Account("Income:Salary");
         var entry = new Entry
         {
             Index = 1
         };
 
-        entry.AddItem(mainBook, cash, usd, 25m);
-        entry.AddItem(mainBook, income, usd, -25m);
+        entry.AddItem(mainBook, cashAccount, usdAsset, 25m);
+        entry.AddItem(mainBook, incomeAccount, usdAsset, -25m);
 
-        var cashItem = Assert.IsAssignableFrom<IEntryItem>(entry.Items.GetEntryItem(mainBook, cash, usd));
-        var incomeItem = Assert.IsAssignableFrom<IEntryItem>(entry.Items.GetEntryItem(mainBook, income, usd));
+        var cashItem = Assert.IsAssignableFrom<IEntryItem>(entry.Items.GetEntryItem(mainBook, cashAccount, usdAsset));
+        var incomeItem = Assert.IsAssignableFrom<IEntryItem>(entry.Items.GetEntryItem(mainBook, incomeAccount, usdAsset));
 
         Assert.Equal(25m, cashItem.Debit);
         Assert.Equal(0m, cashItem.Credit);
@@ -30,16 +30,16 @@ public class EntryTests
     public void AddItems_UsesExistingCreditBalanceBeforeDebitAccount()
     {
         var mainBook = new Book("main");
-        var usd = new Asset("USD");
-        var cash = new Account("assets:cash");
-        var payable = new Account("liabilities:payable");
-        var prepaid = new Account("assets:prepaid");
+        var usdAsset = new Asset("USD");
+        var cashAccount = new Account("Assets:Cash");
+        var payableAccount = new Account("Liabilities:Payable");
+        var prepaidAccount = new Account("Assets:Prepaid");
         var ledger = new Ledger();
         ledger.EntryValidators.Add(new IntegrityEntryValidator());
         ledger.AddEntry(CreateBalancedEntry(
             1,
-            (cash, 100m, 0m),
-            (payable, 0m, 100m)));
+            (cashAccount, 100m, 0m),
+            (payableAccount, 0m, 100m)));
 
         var entry = new Entry
         {
@@ -49,15 +49,15 @@ public class EntryTests
         entry.AddItems(
             ledger,
             mainBook,
-            new QueryAccountPredicate("liabilities:**"),
-            prepaid,
-            payable,
-            usd,
+            new QueryAccountPredicate("Liabilities:**"),
+            prepaidAccount,
+            payableAccount,
+            usdAsset,
             debit: 150m,
             credit: 0m);
 
-        var payableItem = Assert.IsAssignableFrom<IEntryItem>(entry.Items.GetEntryItem(mainBook, payable, usd));
-        var prepaidItem = Assert.IsAssignableFrom<IEntryItem>(entry.Items.GetEntryItem(mainBook, prepaid, usd));
+        var payableItem = Assert.IsAssignableFrom<IEntryItem>(entry.Items.GetEntryItem(mainBook, payableAccount, usdAsset));
+        var prepaidItem = Assert.IsAssignableFrom<IEntryItem>(entry.Items.GetEntryItem(mainBook, prepaidAccount, usdAsset));
 
         Assert.Equal(100m, payableItem.Debit);
         Assert.Equal(0m, payableItem.Credit);
@@ -72,7 +72,7 @@ public class EntryTests
             };
 
             foreach (var item in items)
-                balancedEntry.AddItem(mainBook, item.Account, usd, item.Debit, item.Credit);
+                balancedEntry.AddItem(mainBook, item.Account, usdAsset, item.Debit, item.Credit);
 
             return balancedEntry;
         }
@@ -82,9 +82,9 @@ public class EntryTests
     public void AddItems_RejectsInvalidAmounts()
     {
         var mainBook = new Book("main");
-        var usd = new Asset("USD");
-        var payable = new Account("liabilities:payable");
-        var prepaid = new Account("assets:prepaid");
+        var usdAsset = new Asset("USD");
+        var payableAccount = new Account("Liabilities:Payable");
+        var prepaidAccount = new Account("Assets:Prepaid");
         var entry = new Entry
         {
             Index = 1
@@ -94,9 +94,9 @@ public class EntryTests
             new Ledger(),
             mainBook,
             new TrueAccountPredicate(),
-            prepaid,
-            payable,
-            usd,
+            prepaidAccount,
+            payableAccount,
+            usdAsset,
             debit: -1m,
             credit: 0m));
 
@@ -104,9 +104,9 @@ public class EntryTests
             new Ledger(),
             mainBook,
             new TrueAccountPredicate(),
-            prepaid,
-            payable,
-            usd,
+            prepaidAccount,
+            payableAccount,
+            usdAsset,
             debit: 0m,
             credit: 0m));
 
@@ -114,9 +114,9 @@ public class EntryTests
             new Ledger(),
             mainBook,
             new TrueAccountPredicate(),
-            prepaid,
-            payable,
-            usd,
+            prepaidAccount,
+            payableAccount,
+            usdAsset,
             debit: 1m,
             credit: 1m));
     }

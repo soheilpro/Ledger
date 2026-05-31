@@ -181,11 +181,11 @@ namespace Ledger.Journal
                 {
                     var match = entryItemRegex.Match(lines.Current);
                     var book = match.Groups["book"].Success ? new Book(match.Groups["book"].Value) : new Book("default");
-                    var account = new Account(match.Groups["account"].Value);
-                    var asset = new Asset(match.Groups["asset"].Value);
+                    var accountValue = new Account(match.Groups["account"].Value);
+                    var assetValue = new Asset(match.Groups["asset"].Value);
                     var amount = decimal.Parse(match.Groups["amount"].Value, NumberStyles.AllowLeadingSign | NumberStyles.AllowThousands | NumberStyles.AllowDecimalPoint);
 
-                    entry.AddItem(book, account, asset, amount);
+                    entry.AddItem(book, accountValue, assetValue, amount);
                 }
             }
         }

@@ -6,33 +6,33 @@ public class LedgerTests
     public void AddEntry_CreatesNewBalancesWithoutMutatingPriorSnapshots()
     {
         var mainBook = new Book("main");
-        var usd = new Asset("USD");
-        var cash = new Account("assets:cash");
-        var income = new Account("income:salary");
-        var expense = new Account("expenses:food");
+        var usdAsset = new Asset("USD");
+        var cashAccount = new Account("Assets:Cash");
+        var incomeAccount = new Account("Income:Salary");
+        var expenseAccount = new Account("Expenses:Food");
         var ledger = new Ledger();
         ledger.EntryValidators.Add(new IntegrityEntryValidator());
 
         ledger.AddEntry(CreateBalancedEntry(
             1,
-            (cash, 100m, 0m),
-            (income, 0m, 100m)));
+            (cashAccount, 100m, 0m),
+            (incomeAccount, 0m, 100m)));
 
         var firstBalance = Assert.IsAssignableFrom<IBalance>(ledger.GetBalanceAt(mainBook, 1));
 
         ledger.AddEntry(CreateBalancedEntry(
             2,
-            (expense, 40m, 0m),
-            (cash, 0m, 40m)));
+            (expenseAccount, 40m, 0m),
+            (cashAccount, 0m, 40m)));
 
-        var firstCash = Assert.IsAssignableFrom<IBalanceItem>(firstBalance.Items.GetBalanceItem(cash, usd));
+        var firstCash = Assert.IsAssignableFrom<IBalanceItem>(firstBalance.Items.GetBalanceItem(cashAccount, usdAsset));
         var secondBalance = Assert.IsAssignableFrom<IBalance>(ledger.GetBalanceAt(mainBook, 2));
-        var secondCash = Assert.IsAssignableFrom<IBalanceItem>(secondBalance.Items.GetBalanceItem(cash, usd));
-        var expenseBalance = Assert.IsAssignableFrom<IBalanceItem>(secondBalance.Items.GetBalanceItem(expense, usd));
+        var secondCash = Assert.IsAssignableFrom<IBalanceItem>(secondBalance.Items.GetBalanceItem(cashAccount, usdAsset));
+        var expenseBalance = Assert.IsAssignableFrom<IBalanceItem>(secondBalance.Items.GetBalanceItem(expenseAccount, usdAsset));
 
         Assert.Equal(100m, firstCash.TotalDebit);
         Assert.Equal(0m, firstCash.TotalCredit);
-        Assert.Null(firstBalance.Items.GetBalanceItem(expense, usd));
+        Assert.Null(firstBalance.Items.GetBalanceItem(expenseAccount, usdAsset));
 
         Assert.Equal(100m, secondCash.TotalDebit);
         Assert.Equal(40m, secondCash.TotalCredit);
@@ -47,7 +47,7 @@ public class LedgerTests
             };
 
             foreach (var item in items)
-                entry.AddItem(mainBook, item.Account, usd, item.Debit, item.Credit);
+                entry.AddItem(mainBook, item.Account, usdAsset, item.Debit, item.Credit);
 
             return entry;
         }
@@ -57,22 +57,22 @@ public class LedgerTests
     public void AddEntry_RejectsEntriesThatDoNotAdvanceTheIndex()
     {
         var mainBook = new Book("main");
-        var usd = new Asset("USD");
-        var cash = new Account("assets:cash");
-        var income = new Account("income:salary");
-        var expense = new Account("expenses:food");
+        var usdAsset = new Asset("USD");
+        var cashAccount = new Account("Assets:Cash");
+        var incomeAccount = new Account("Income:Salary");
+        var expenseAccount = new Account("Expenses:Food");
         var ledger = new Ledger();
         ledger.EntryValidators.Add(new IntegrityEntryValidator());
 
         ledger.AddEntry(CreateBalancedEntry(
             2,
-            (cash, 100m, 0m),
-            (income, 0m, 100m)));
+            (cashAccount, 100m, 0m),
+            (incomeAccount, 0m, 100m)));
 
         var exception = Assert.Throws<ValidationException>(() => ledger.AddEntry(CreateBalancedEntry(
             2,
-            (expense, 10m, 0m),
-            (cash, 0m, 10m))));
+            (expenseAccount, 10m, 0m),
+            (cashAccount, 0m, 10m))));
 
         Assert.Contains("cannot occur on or before the last entry", exception.Message);
 
@@ -84,7 +84,7 @@ public class LedgerTests
             };
 
             foreach (var item in items)
-                entry.AddItem(mainBook, item.Account, usd, item.Debit, item.Credit);
+                entry.AddItem(mainBook, item.Account, usdAsset, item.Debit, item.Credit);
 
             return entry;
         }
@@ -94,16 +94,16 @@ public class LedgerTests
     public void EntryAndBalanceQueries_UseExpectedRangeBoundaries()
     {
         var mainBook = new Book("main");
-        var usd = new Asset("USD");
-        var cash = new Account("assets:cash");
-        var income = new Account("income:salary");
-        var expense = new Account("expenses:food");
+        var usdAsset = new Asset("USD");
+        var cashAccount = new Account("Assets:Cash");
+        var incomeAccount = new Account("Income:Salary");
+        var expenseAccount = new Account("Expenses:Food");
         var ledger = new Ledger();
         ledger.EntryValidators.Add(new IntegrityEntryValidator());
 
-        ledger.AddEntry(CreateBalancedEntry(1, (cash, 100m, 0m), (income, 0m, 100m)));
-        ledger.AddEntry(CreateBalancedEntry(2, (expense, 30m, 0m), (cash, 0m, 30m)));
-        ledger.AddEntry(CreateBalancedEntry(3, (expense, 20m, 0m), (cash, 0m, 20m)));
+        ledger.AddEntry(CreateBalancedEntry(1, (cashAccount, 100m, 0m), (incomeAccount, 0m, 100m)));
+        ledger.AddEntry(CreateBalancedEntry(2, (expenseAccount, 30m, 0m), (cashAccount, 0m, 30m)));
+        ledger.AddEntry(CreateBalancedEntry(3, (expenseAccount, 20m, 0m), (cashAccount, 0m, 20m)));
 
         Assert.Equal(1, ledger.GetEntryBefore(2)?.Index);
         Assert.Equal(2, ledger.GetEntryAtOrBefore(2)?.Index);
@@ -127,7 +127,7 @@ public class LedgerTests
             };
 
             foreach (var item in items)
-                entry.AddItem(mainBook, item.Account, usd, item.Debit, item.Credit);
+                entry.AddItem(mainBook, item.Account, usdAsset, item.Debit, item.Credit);
 
             return entry;
         }

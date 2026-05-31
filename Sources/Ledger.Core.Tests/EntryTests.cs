@@ -36,10 +36,13 @@ public class EntryTests
         var prepaidAccount = new Account("Assets:Prepaid");
         var ledger = new Ledger();
         ledger.EntryValidators.Add(new IntegrityEntryValidator());
-        ledger.AddEntry(CreateBalancedEntry(
-            1,
-            (cashAccount, 100m, 0m),
-            (payableAccount, 0m, 100m)));
+        var openingEntry = new Entry
+        {
+            Index = 1
+        };
+        openingEntry.AddItem(mainBook, cashAccount, usdAsset, 100m, 0m);
+        openingEntry.AddItem(mainBook, payableAccount, usdAsset, 0m, 100m);
+        ledger.AddEntry(openingEntry);
 
         var entry = new Entry
         {
@@ -63,19 +66,6 @@ public class EntryTests
         Assert.Equal(0m, payableItem.Credit);
         Assert.Equal(50m, prepaidItem.Debit);
         Assert.Equal(0m, prepaidItem.Credit);
-
-        Entry CreateBalancedEntry(int index, params (Account Account, decimal Debit, decimal Credit)[] items)
-        {
-            var balancedEntry = new Entry
-            {
-                Index = index
-            };
-
-            foreach (var item in items)
-                balancedEntry.AddItem(mainBook, item.Account, usdAsset, item.Debit, item.Credit);
-
-            return balancedEntry;
-        }
     }
 
     [Fact]
@@ -89,10 +79,13 @@ public class EntryTests
         var prepaidAccount = new Account("Assets:Prepaid");
         var ledger = new Ledger();
         ledger.EntryValidators.Add(new IntegrityEntryValidator());
-        ledger.AddEntry(CreateBalancedEntry(
-            1,
-            (cashAccount, eurAsset, 100m, 0m),
-            (payableAccount, eurAsset, 0m, 100m)));
+        var openingEntry = new Entry
+        {
+            Index = 1
+        };
+        openingEntry.AddItem(mainBook, cashAccount, eurAsset, 100m, 0m);
+        openingEntry.AddItem(mainBook, payableAccount, eurAsset, 0m, 100m);
+        ledger.AddEntry(openingEntry);
 
         var entry = new Entry
         {
@@ -114,19 +107,6 @@ public class EntryTests
         var prepaidItem = Assert.IsAssignableFrom<IEntryItem>(entry.Items.GetEntryItem(mainBook, prepaidAccount, usdAsset));
         Assert.Equal(40m, prepaidItem.Debit);
         Assert.Equal(0m, prepaidItem.Credit);
-
-        Entry CreateBalancedEntry(int index, params (Account Account, Asset Asset, decimal Debit, decimal Credit)[] items)
-        {
-            var balancedEntry = new Entry
-            {
-                Index = index
-            };
-
-            foreach (var item in items)
-                balancedEntry.AddItem(mainBook, item.Account, item.Asset, item.Debit, item.Credit);
-
-            return balancedEntry;
-        }
     }
 
     [Fact]

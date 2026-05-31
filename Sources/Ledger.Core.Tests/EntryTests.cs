@@ -79,6 +79,57 @@ public class EntryTests
     }
 
     [Fact]
+    public void AddItems_UsesOnlyBalancesForTheSpecifiedAsset()
+    {
+        var mainBook = new Book("main");
+        var usdAsset = new Asset("USD");
+        var eurAsset = new Asset("EUR");
+        var cashAccount = new Account("Assets:Cash");
+        var payableAccount = new Account("Liabilities:Payable");
+        var prepaidAccount = new Account("Assets:Prepaid");
+        var ledger = new Ledger();
+        ledger.EntryValidators.Add(new IntegrityEntryValidator());
+        ledger.AddEntry(CreateBalancedEntry(
+            1,
+            (cashAccount, eurAsset, 100m, 0m),
+            (payableAccount, eurAsset, 0m, 100m)));
+
+        var entry = new Entry
+        {
+            Index = 2
+        };
+
+        entry.AddItems(
+            ledger,
+            mainBook,
+            new QueryAccountPredicate("Liabilities:**"),
+            prepaidAccount,
+            payableAccount,
+            usdAsset,
+            debit: 40m,
+            credit: 0m);
+
+        Assert.Null(entry.Items.GetEntryItem(mainBook, payableAccount, usdAsset));
+
+        var prepaidItem = Assert.IsAssignableFrom<IEntryItem>(entry.Items.GetEntryItem(mainBook, prepaidAccount, usdAsset));
+        Assert.Equal(40m, prepaidItem.Debit);
+        Assert.Equal(0m, prepaidItem.Credit);
+
+        Entry CreateBalancedEntry(int index, params (Account Account, Asset Asset, decimal Debit, decimal Credit)[] items)
+        {
+            var balancedEntry = new Entry
+            {
+                Index = index
+            };
+
+            foreach (var item in items)
+                balancedEntry.AddItem(mainBook, item.Account, item.Asset, item.Debit, item.Credit);
+
+            return balancedEntry;
+        }
+    }
+
+    [Fact]
     public void AddItems_RejectsInvalidAmounts()
     {
         var mainBook = new Book("main");

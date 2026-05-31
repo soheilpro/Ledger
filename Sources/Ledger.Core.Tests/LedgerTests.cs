@@ -91,6 +91,40 @@ public class LedgerTests
     }
 
     [Fact]
+    public void AddEntry_KeepsBalancesSeparateForDifferentAssets()
+    {
+        var mainBook = new Book("main");
+        var usdAsset = new Asset("USD");
+        var eurAsset = new Asset("EUR");
+        var cashAccount = new Account("Assets:Cash");
+        var incomeAccount = new Account("Income:Salary");
+        var ledger = new Ledger();
+        ledger.EntryValidators.Add(new IntegrityEntryValidator());
+
+        var entry = new Entry
+        {
+            Index = 1
+        };
+
+        entry.AddItem(mainBook, cashAccount, usdAsset, 100m, 0m);
+        entry.AddItem(mainBook, incomeAccount, usdAsset, 0m, 100m);
+        entry.AddItem(mainBook, cashAccount, eurAsset, 60m, 0m);
+        entry.AddItem(mainBook, incomeAccount, eurAsset, 0m, 60m);
+
+        ledger.AddEntry(entry);
+
+        var balance = Assert.IsAssignableFrom<IBalance>(ledger.GetBalanceAt(mainBook, 1));
+        var usdCash = Assert.IsAssignableFrom<IBalanceItem>(balance.Items.GetBalanceItem(cashAccount, usdAsset));
+        var eurCash = Assert.IsAssignableFrom<IBalanceItem>(balance.Items.GetBalanceItem(cashAccount, eurAsset));
+
+        Assert.Equal(100m, usdCash.TotalDebit);
+        Assert.Equal(0m, usdCash.TotalCredit);
+        Assert.Equal(60m, eurCash.TotalDebit);
+        Assert.Equal(0m, eurCash.TotalCredit);
+        Assert.Equal(2, balance.Items.GetBalanceItemsCombined(new QueryAccountPredicate("Assets:**")).Count);
+    }
+
+    [Fact]
     public void EntryAndBalanceQueries_UseExpectedRangeBoundaries()
     {
         var mainBook = new Book("main");

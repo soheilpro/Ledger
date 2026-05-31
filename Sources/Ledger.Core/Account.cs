@@ -1,14 +1,32 @@
 using System;
+using System.Linq;
 
 namespace Ledger.Core
 {
     public class Account : IAccount
     {
+        private static readonly string[] ValidCategoryPrefixes =
+        {
+            "Assets",
+            "Liabilities",
+            "Equity:Capital",
+            "Equity:ProfitLoss:Income",
+            "Equity:ProfitLoss:Expense"
+        };
+
+        private string _id;
         private string[] _idParts;
 
         public string Id {
-            get;
-            set;
+            get
+            {
+                return _id;
+            }
+            set
+            {
+                _id = ValidateId(value);
+                _idParts = _id.Split(':');
+            }
         }
 
         public string[] IdParts
@@ -25,7 +43,17 @@ namespace Ledger.Core
         public Account(string id)
         {
             Id = id;
-            _idParts = Id.Split(':');
+        }
+
+        private static string ValidateId(string id)
+        {
+            if (string.IsNullOrWhiteSpace(id))
+                throw new ArgumentException("Account ID must be specified.", nameof(id));
+
+            if (ValidCategoryPrefixes.Any(prefix => id.Equals(prefix, StringComparison.Ordinal) || id.StartsWith(prefix + ":", StringComparison.Ordinal)))
+                return id;
+
+            throw new ArgumentException($"Account ({id}) must be under one of these categories: Assets, Liabilities, Equity:Capital, Equity:ProfitLoss:Income, Equity:ProfitLoss:Expense.", nameof(id));
         }
 
         public override bool Equals(object other)

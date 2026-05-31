@@ -8,8 +8,8 @@ public class LedgerTests
         var mainBook = new Book("main");
         var usdAsset = new Asset("USD");
         var cashAccount = new Account("Assets:Cash");
-        var incomeAccount = new Account("Income:Salary");
-        var expenseAccount = new Account("Expenses:Food");
+        var incomeAccount = new Account("Equity:ProfitLoss:Income:Salary");
+        var expenseAccount = new Account("Equity:ProfitLoss:Expense:Food");
         var ledger = new Ledger();
         ledger.EntryValidators.Add(new IntegrityEntryValidator());
 
@@ -52,8 +52,8 @@ public class LedgerTests
         var mainBook = new Book("main");
         var usdAsset = new Asset("USD");
         var cashAccount = new Account("Assets:Cash");
-        var incomeAccount = new Account("Income:Salary");
-        var expenseAccount = new Account("Expenses:Food");
+        var incomeAccount = new Account("Equity:ProfitLoss:Income:Salary");
+        var expenseAccount = new Account("Equity:ProfitLoss:Expense:Food");
         var ledger = new Ledger();
         ledger.EntryValidators.Add(new IntegrityEntryValidator());
 
@@ -84,7 +84,7 @@ public class LedgerTests
         var usdAsset = new Asset("USD");
         var eurAsset = new Asset("EUR");
         var cashAccount = new Account("Assets:Cash");
-        var incomeAccount = new Account("Income:Salary");
+        var incomeAccount = new Account("Equity:ProfitLoss:Income:Salary");
         var ledger = new Ledger();
         ledger.EntryValidators.Add(new IntegrityEntryValidator());
 
@@ -117,8 +117,8 @@ public class LedgerTests
         var mainBook = new Book("main");
         var usdAsset = new Asset("USD");
         var cashAccount = new Account("Assets:Cash");
-        var incomeAccount = new Account("Income:Salary");
-        var expenseAccount = new Account("Expenses:Food");
+        var incomeAccount = new Account("Equity:ProfitLoss:Income:Salary");
+        var expenseAccount = new Account("Equity:ProfitLoss:Expense:Food");
         var ledger = new Ledger();
         ledger.EntryValidators.Add(new IntegrityEntryValidator());
 

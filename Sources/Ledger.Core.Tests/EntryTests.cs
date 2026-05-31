@@ -8,7 +8,7 @@ public class EntryTests
         var mainBook = new Book("main");
         var usdAsset = new Asset("USD");
         var cashAccount = new Account("Assets:Cash");
-        var incomeAccount = new Account("Income:Salary");
+        var incomeAccount = new Account("Equity:ProfitLoss:Income:Salary");
         var entry = new Entry
         {
             Index = 1

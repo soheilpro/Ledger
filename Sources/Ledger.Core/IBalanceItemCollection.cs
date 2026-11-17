@@ -7,6 +7,8 @@ namespace Ledger.Core
     {
         void Add(IBalanceItem balanceItem);
 
+        void AddRange(IEnumerable<IBalanceItem> balanceItems);
+
         void AddOrUpdate(IBalanceItem balanceItem, IBalanceItem existingBalanceItem);
 
         IBalanceItem GetBalanceItem(IAccount account);

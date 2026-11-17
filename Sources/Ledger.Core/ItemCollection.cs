@@ -27,12 +27,66 @@ namespace Ledger.Core
             AddOrUpdate(item, null);
         }
 
+        public void AddRange(IEnumerable<TItem> items)
+        {
+            if (items == null)
+                throw new ArgumentNullException(nameof(items));
+
+            var additions = new BatchNode();
+            var hasItems = false;
+
+            foreach (var item in items)
+            {
+                var accountIdParts = ((Account)item.Account).IdParts;
+                var batchNode = additions;
+
+                for (var accountIdPartIndex = 0; accountIdPartIndex < accountIdParts.Length; accountIdPartIndex++)
+                {
+                    var idPart = accountIdParts[accountIdPartIndex];
+                    BatchNode childNode;
+
+                    if (batchNode.ChildNodes == null)
+                    {
+                        batchNode.ChildNodes = new Dictionary<string, BatchNode>();
+                        batchNode.ChildNodesInOrder = new List<KeyValuePair<string, BatchNode>>();
+                    }
+
+                    if (!batchNode.ChildNodes.TryGetValue(idPart, out childNode))
+                    {
+                        childNode = new BatchNode();
+                        batchNode.ChildNodes.Add(idPart, childNode);
+                        batchNode.ChildNodesInOrder.Add(new KeyValuePair<string, BatchNode>(idPart, childNode));
+                    }
+
+                    batchNode = childNode;
+                }
+
+                if (batchNode.Items == null)
+                    batchNode.Items = new List<TItem>();
+
+                batchNode.Items.Add(item);
+                hasItems = true;
+            }
+
+            if (!hasItems)
+                return;
+
+            _rootNode = CopyNode(_rootNode);
+            MergeAdditions(_rootNode, additions);
+        }
+
         public void AddOrUpdate(TItem item, TItem existingItem)
         {
             // Performance.MarkStart("ItemCollection.AddOrUpdate");
 
             _rootNode = CopyNode(_rootNode);
+            AddOrUpdateCore(item, existingItem);
 
+            // Performance.MarkEnd("ItemCollection.AddOrUpdate");
+        }
+
+        private void AddOrUpdateCore(TItem item, TItem existingItem)
+        {
             var accountIdParts = ((Account)item.Account).IdParts;
             var node = _rootNode;
 
@@ -54,8 +108,38 @@ namespace Ledger.Core
                 node.Items.Remove(existingItem);
 
             node.Items.Add(item);
+        }
 
-            // Performance.MarkEnd("ItemCollection.AddOrUpdate");
+        private void MergeAdditions(Node rootNode, BatchNode additions)
+        {
+            var nodes = new Stack<KeyValuePair<Node, BatchNode>>();
+            nodes.Push(new KeyValuePair<Node, BatchNode>(rootNode, additions));
+
+            while (nodes.Count > 0)
+            {
+                var pair = nodes.Pop();
+                var node = pair.Key;
+                var batchNode = pair.Value;
+
+                if (batchNode.Items != null)
+                    node.Items.AddRange(batchNode.Items);
+
+                if (batchNode.ChildNodesInOrder != null)
+                {
+                    foreach (var child in batchNode.ChildNodesInOrder)
+                    {
+                        Node childNode;
+
+                        if (node.ChildNodes.TryGetValue(child.Key, out childNode))
+                            childNode = CopyNode(childNode);
+                        else
+                            childNode = new Node(_owner);
+
+                        node.ChildNodes.Set(child.Key, childNode);
+                        nodes.Push(new KeyValuePair<Node, BatchNode>(childNode, child.Value));
+                    }
+                }
+            }
         }
 
         private Node CopyNode(Node node)
@@ -206,6 +290,27 @@ namespace Ledger.Core
         IEnumerator IEnumerable.GetEnumerator()
         {
             return GetEnumerator();
+        }
+
+        private class BatchNode
+        {
+            public Dictionary<string, BatchNode> ChildNodes
+            {
+                get;
+                set;
+            }
+
+            public List<KeyValuePair<string, BatchNode>> ChildNodesInOrder
+            {
+                get;
+                set;
+            }
+
+            public List<TItem> Items
+            {
+                get;
+                set;
+            }
         }
 
         protected class Node

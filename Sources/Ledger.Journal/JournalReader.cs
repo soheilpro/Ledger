@@ -143,11 +143,15 @@ namespace Ledger.Journal
                 Index = directive.Data,
                 Type = EntryType.Normal
             };
+            var entryItems = new List<IEntryItem>();
 
             while (true)
             {
                 if (!lines.MoveNext() || IsNullOrEmpty(lines.Current))
+                {
+                    entry.Items.AddRange(entryItems);
                     return entry;
+                }
 
                 if (IsComment(lines.Current))
                     continue;
@@ -185,7 +189,15 @@ namespace Ledger.Journal
                     var asset = new Asset(match.Groups["asset"].Value);
                     var amount = decimal.Parse(match.Groups["amount"].Value, NumberStyles.AllowLeadingSign | NumberStyles.AllowThousands | NumberStyles.AllowDecimalPoint);
 
-                    entry.AddItem(book, account, asset, amount);
+                    entryItems.Add(new EntryItem
+                    {
+                        Entry = entry,
+                        Book = book,
+                        Account = account,
+                        Asset = asset,
+                        Debit = amount > 0 ? amount : 0,
+                        Credit = amount < 0 ? -amount : 0
+                    });
                 }
             }
         }

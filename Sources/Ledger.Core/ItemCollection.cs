@@ -32,18 +32,47 @@ namespace Ledger.Core
             if (items == null)
                 throw new ArgumentNullException(nameof(items));
 
-            var isFirstItem = true;
+            var additions = new BatchNode();
+            var hasItems = false;
 
             foreach (var item in items)
             {
-                if (isFirstItem)
+                var accountIdParts = ((Account)item.Account).IdParts;
+                var batchNode = additions;
+
+                for (var accountIdPartIndex = 0; accountIdPartIndex < accountIdParts.Length; accountIdPartIndex++)
                 {
-                    _rootNode = CopyNode(_rootNode);
-                    isFirstItem = false;
+                    var idPart = accountIdParts[accountIdPartIndex];
+                    BatchNode childNode;
+
+                    if (batchNode.ChildNodes == null)
+                    {
+                        batchNode.ChildNodes = new Dictionary<string, BatchNode>();
+                        batchNode.ChildNodesInOrder = new List<KeyValuePair<string, BatchNode>>();
+                    }
+
+                    if (!batchNode.ChildNodes.TryGetValue(idPart, out childNode))
+                    {
+                        childNode = new BatchNode();
+                        batchNode.ChildNodes.Add(idPart, childNode);
+                        batchNode.ChildNodesInOrder.Add(new KeyValuePair<string, BatchNode>(idPart, childNode));
+                    }
+
+                    batchNode = childNode;
                 }
 
-                AddOrUpdateCore(item, null);
+                if (batchNode.Items == null)
+                    batchNode.Items = new List<TItem>();
+
+                batchNode.Items.Add(item);
+                hasItems = true;
             }
+
+            if (!hasItems)
+                return;
+
+            _rootNode = CopyNode(_rootNode);
+            MergeAdditions(_rootNode, additions);
         }
 
         public void AddOrUpdate(TItem item, TItem existingItem)
@@ -79,6 +108,38 @@ namespace Ledger.Core
                 node.Items.Remove(existingItem);
 
             node.Items.Add(item);
+        }
+
+        private void MergeAdditions(Node rootNode, BatchNode additions)
+        {
+            var nodes = new Stack<KeyValuePair<Node, BatchNode>>();
+            nodes.Push(new KeyValuePair<Node, BatchNode>(rootNode, additions));
+
+            while (nodes.Count > 0)
+            {
+                var pair = nodes.Pop();
+                var node = pair.Key;
+                var batchNode = pair.Value;
+
+                if (batchNode.Items != null)
+                    node.Items.AddRange(batchNode.Items);
+
+                if (batchNode.ChildNodesInOrder != null)
+                {
+                    foreach (var child in batchNode.ChildNodesInOrder)
+                    {
+                        Node childNode;
+
+                        if (node.ChildNodes.TryGetValue(child.Key, out childNode))
+                            childNode = CopyNode(childNode);
+                        else
+                            childNode = new Node(_owner);
+
+                        node.ChildNodes.Set(child.Key, childNode);
+                        nodes.Push(new KeyValuePair<Node, BatchNode>(childNode, child.Value));
+                    }
+                }
+            }
         }
 
         private Node CopyNode(Node node)
@@ -229,6 +290,27 @@ namespace Ledger.Core
         IEnumerator IEnumerable.GetEnumerator()
         {
             return GetEnumerator();
+        }
+
+        private class BatchNode
+        {
+            public Dictionary<string, BatchNode> ChildNodes
+            {
+                get;
+                set;
+            }
+
+            public List<KeyValuePair<string, BatchNode>> ChildNodesInOrder
+            {
+                get;
+                set;
+            }
+
+            public List<TItem> Items
+            {
+                get;
+                set;
+            }
         }
 
         protected class Node

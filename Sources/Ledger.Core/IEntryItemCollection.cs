@@ -7,6 +7,8 @@ namespace Ledger.Core
     {
         void Add(IEntryItem entryItem);
 
+        void AddRange(IEnumerable<IEntryItem> entryItems);
+
         IEntryItem GetEntryItem(IBook book, IAccount account);
 
         IEntryItem GetEntryItem(IBook book, IAccount account, IAsset asset);

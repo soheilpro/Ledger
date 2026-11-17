@@ -27,12 +27,37 @@ namespace Ledger.Core
             AddOrUpdate(item, null);
         }
 
+        public void AddRange(IEnumerable<TItem> items)
+        {
+            if (items == null)
+                throw new ArgumentNullException(nameof(items));
+
+            var isFirstItem = true;
+
+            foreach (var item in items)
+            {
+                if (isFirstItem)
+                {
+                    _rootNode = CopyNode(_rootNode);
+                    isFirstItem = false;
+                }
+
+                AddOrUpdateCore(item, null);
+            }
+        }
+
         public void AddOrUpdate(TItem item, TItem existingItem)
         {
             // Performance.MarkStart("ItemCollection.AddOrUpdate");
 
             _rootNode = CopyNode(_rootNode);
+            AddOrUpdateCore(item, existingItem);
 
+            // Performance.MarkEnd("ItemCollection.AddOrUpdate");
+        }
+
+        private void AddOrUpdateCore(TItem item, TItem existingItem)
+        {
             var accountIdParts = ((Account)item.Account).IdParts;
             var node = _rootNode;
 
@@ -54,8 +79,6 @@ namespace Ledger.Core
                 node.Items.Remove(existingItem);
 
             node.Items.Add(item);
-
-            // Performance.MarkEnd("ItemCollection.AddOrUpdate");
         }
 
         private Node CopyNode(Node node)
